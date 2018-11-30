@@ -1,0 +1,36 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:l="/lib/layout">
+    <style>
+	.iframe-container {
+	    position: relative;
+    	padding-bottom: 56.25%;
+    	padding-top: 35px;
+    	height: 0;
+    	overflow: hidden;
+	}
+	.iframe-container iframe {
+    	position: absolute;
+    	top:0;
+    	left: 0;
+    	width: 100%;
+    	height: 100%;
+	}
+	</style>
+	<l:layout>
+        <st:include it="${it.build}" page="sidepanel.jelly"/>
+        <l:main-panel >  
+        <!--<div style="border-style: solid;border-width: thin;">
+	        	<div align="center">
+	        	<h3 style="color: red">TestType: ${it.testType} </h3>
+	        	<h3>OperatingSystem: ${it.operatingSystem} </h3>  
+	        	<h3>Browser: ${it.browser} </h3>  
+	        	<h3>Resolution: ${it.resolution} </h3>  
+	        	<h3>Build Number: ${it.buildNumber} </h3> 
+	        	</div>
+       	 	</div>-->
+        	<div class="iframe-container">
+            	<iframe src="https://ml.lambdatest.io/timeline" height="1000" width="1024"></iframe>
+            </div>
+        </l:main-panel>
+    </l:layout>
+</j:jelly>
