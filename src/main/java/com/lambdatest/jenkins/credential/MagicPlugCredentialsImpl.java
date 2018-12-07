@@ -29,15 +29,23 @@ public class MagicPlugCredentialsImpl extends BaseStandardCredentials implements
 
 	private static final long serialVersionUID = 1L;
 	private final String username;
-	private final String authKey;
+	private final String accessToken;
 
 	@DataBoundConstructor
 	public MagicPlugCredentialsImpl(CredentialsScope scope, String id, String description, String username,
-			String authKey) {
+			String accessToken) throws Exception {
 		super(scope, id, description);
-		System.out.println("MagicPlugCredentialsImpl");
-		this.username = username;
-		this.authKey = authKey;
+		try {
+			System.out.println("MagicPlugCredentialsImpl");
+			this.username = username;
+			this.accessToken = accessToken;
+			System.out.println("Here We can Verify Credentials Also before Adding");
+			if (!CapabilityService.isValidUser(username, accessToken)) {
+				throw new Exception("Invalid username and access Token");
+			}
+		} catch (Exception e) {
+			throw e;
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -72,15 +80,38 @@ public class MagicPlugCredentialsImpl extends BaseStandardCredentials implements
 		}
 
 		public FormValidation doVerifyCredentials(@QueryParameter("username") final String username,
-				@QueryParameter("authKey") final String authKey) throws IOException, ServletException {
-			System.out.println(username + ":" + authKey);
-			if (StringUtils.isBlank(username) || StringUtils.isBlank(authKey)) {
+				@QueryParameter("accessToken") final String accessToken) throws IOException, ServletException {
+			System.out.println(username + ":" + accessToken);
+			if (StringUtils.isBlank(username) || StringUtils.isBlank(accessToken)) {
 				return FormValidation.error("Please enter valid username and authKey");
 			}
-			if (CapabilityService.isValidUser(username, authKey)) {
+			if (CapabilityService.isValidUser(username, accessToken)) {
 				return FormValidation.ok("Successful Authentication");
 			} else {
 				return FormValidation.error("Invalid Credentials");
+			}
+		}
+
+		public FormValidation doCheckUsername(@QueryParameter String username) throws IOException, ServletException {
+			try {
+				if (StringUtils.isBlank(username)) {
+					return FormValidation.error("Invalid username");
+				}
+				return FormValidation.ok();
+			} catch (NumberFormatException e) {
+				return FormValidation.error("Invalid username");
+			}
+		}
+
+		public FormValidation doCheckAccessToken(@QueryParameter String accessToken)
+				throws IOException, ServletException {
+			try {
+				if (StringUtils.isBlank(accessToken)) {
+					return FormValidation.error("Invalid Access Token");
+				}
+				return FormValidation.ok();
+			} catch (NumberFormatException e) {
+				return FormValidation.error("Invalid Access Token");
 			}
 		}
 
@@ -96,12 +127,17 @@ public class MagicPlugCredentialsImpl extends BaseStandardCredentials implements
 	}
 
 	@Override
-	public String getAuthKey() {
-		if (this.authKey == null) {
+	public String getAccessToken() {
+		if (this.accessToken == null) {
 			return Constant.NOT_AVAILABLE;
 		} else {
-			return this.authKey;
+			return this.accessToken;
 		}
+	}
+
+	@Override
+	public String getDisplayName() {
+		return getUserName();
 	}
 
 }

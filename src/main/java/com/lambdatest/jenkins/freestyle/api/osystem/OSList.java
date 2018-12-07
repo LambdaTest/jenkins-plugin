@@ -8,12 +8,15 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-    "os"
+    "os",
+    "browsers"
 })
 public class OSList {
 
     @JsonProperty("os")
     private List<O> os = null;
+    @JsonProperty("browsers")
+    private List<Browser> browsers = null;
 
     @JsonProperty("os")
     public List<O> getOs() {
@@ -23,6 +26,16 @@ public class OSList {
     @JsonProperty("os")
     public void setOs(List<O> os) {
         this.os = os;
+    }
+
+    @JsonProperty("browsers")
+    public List<Browser> getBrowsers() {
+        return browsers;
+    }
+
+    @JsonProperty("browsers")
+    public void setBrowsers(List<Browser> browsers) {
+        this.browsers = browsers;
     }
 
 }

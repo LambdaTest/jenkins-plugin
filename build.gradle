@@ -21,7 +21,7 @@ targetCompatibility = 1.8
 
 jenkinsPlugin {
     // version of Jenkins core this plugin depends on, must be 1.420 or later
-    coreVersion = '2.151'
+    coreVersion = '2.153'
 
     // ID of the plugin, defaults to the project name without trailing '-plugin'
     shortName = 'magic-plug'

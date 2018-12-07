@@ -10,11 +10,12 @@ public class LambdaFreeStyleBuildAction extends AbstractFreeStyleBuildAction {
 	private String buildName;
 	private String buildNumber;
 	private String testType;
-	
+	private String iframeLink;
 
-	LambdaFreeStyleBuildAction(final String testType,final String operatingSystem, final String browser, final String resolution) {
+	LambdaFreeStyleBuildAction(final String testType, final String operatingSystem, final String browser,
+			final String resolution) {
 		super();
-		this.testType=testType;
+		this.testType = testType;
 		this.operatingSystem = operatingSystem;
 		this.browser = browser;
 		this.resolution = resolution;
@@ -71,5 +72,14 @@ public class LambdaFreeStyleBuildAction extends AbstractFreeStyleBuildAction {
 		this.testType = testType;
 	}
 
-	
+	public String getIframeLink() {
+		return iframeLink;
+	}
+
+	public void setIframeLink(String buildNumber, String username, String accessToken) {
+		this.iframeLink = new StringBuilder("http://dev.lambdatest.io:3000/jenkins/?buildID=['").append(buildNumber)
+				.append("']&token=").append(accessToken).append("&username=").append(username).append("&auth=jenkins")
+				.toString();
+	}
+
 }
