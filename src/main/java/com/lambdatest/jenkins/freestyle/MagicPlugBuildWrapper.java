@@ -8,7 +8,6 @@ import java.util.Map;
 
 import javax.annotation.CheckForNull;
 
-import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 import org.springframework.util.CollectionUtils;
@@ -19,7 +18,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lambdatest.jenkins.credential.MagicPlugCredentials;
 import com.lambdatest.jenkins.credential.MagicPlugCredentialsImpl;
 import com.lambdatest.jenkins.freestyle.api.Constant;
-import com.lambdatest.jenkins.freestyle.api.osystem.Version;
 import com.lambdatest.jenkins.freestyle.api.service.CapabilityService;
 
 import hudson.Launcher;
@@ -33,7 +31,7 @@ import net.sf.json.JSONObject;
 public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable {
 
 	private List<JSONObject> seleniumCapabilityRequests = null;
-	private static String username;
+	private String username;
 	private String accessToken;
 	private String gridURL;
 
@@ -89,36 +87,31 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 		System.out.println("buildname :" + buildname);
 		System.out.println("buildnumber :" + buildnumber);
 		for (JSONObject seleniumCapabilityRequest : seleniumCapabilityRequests) {
-			makeFreeStyleBuildActions(build, buildname, buildnumber, seleniumCapabilityRequest, this.username,
+			createFreeStyleBuildActions(build, buildname, buildnumber, seleniumCapabilityRequest, this.username,
 					this.accessToken);
 		}
 		System.out.println("Adding LT actions done");
 
 		// Create Grid URL
-		this.gridURL = createGridURL(this.username, this.accessToken);
+		this.gridURL = CapabilityService.buildHubURL(this.username, this.accessToken);
 		System.out.println(this.gridURL);
 		System.out.println("Environment setUp() -end");
 		return new MagicPlugEnvironment(build);
 	}
 
-	private String createGridURL(String username, String authKey) {
-		StringBuilder sb = new StringBuilder();
-		sb.append("https://").append(username).append(":").append(authKey).append("@dev-ml.lambdatest.com/wd/hub");
-		return sb.toString();
-	}
-
-	public static void makeFreeStyleBuildActions(AbstractBuild build, String buildname, String buildnumber,
+	public static void createFreeStyleBuildActions(AbstractBuild build, String buildname, String buildnumber,
 			JSONObject seleniumCapabilityRequest, String username, String accessToken) {
-		String operatingSystem = seleniumCapabilityRequest.getString("operatingSystem");
-		String browser = seleniumCapabilityRequest.getString("browser");
-		String resolution = seleniumCapabilityRequest.getString("resolution");
+		String operatingSystem = seleniumCapabilityRequest.getString(Constant.OPERATING_SYSTEM);
+		String browserName = seleniumCapabilityRequest.getString(Constant.BROWSER_NAME);
+		String browserVersion = seleniumCapabilityRequest.getString(Constant.BROWSER_VERSION);
+		String resolution = seleniumCapabilityRequest.getString(Constant.RESOLUTION);
 
 		LambdaFreeStyleBuildAction lfsBuildAction = new LambdaFreeStyleBuildAction("SeleniumTest", operatingSystem,
-				browser, resolution);
+				browserName, browserVersion, resolution);
 		lfsBuildAction.setBuild(build);
 		lfsBuildAction.setBuildName(buildname);
 		lfsBuildAction.setBuildNumber(buildnumber);
-		lfsBuildAction.setIframeLink(buildnumber, username, accessToken);
+		lfsBuildAction.setIframeLink(CapabilityService.buildIFrameLink(buildnumber, username, accessToken));
 		build.addAction(lfsBuildAction);
 	}
 
@@ -140,20 +133,14 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 			String buildname = build.getFullDisplayName().substring(0,
 					build.getFullDisplayName().length() - (String.valueOf(build.getNumber()).length() + 1));
 			String buildnumber = String.valueOf(build.getNumber());
-			Map<String, Version> allBrowsersData = CapabilityService.allBrowserData;
 			if (!CollectionUtils.isEmpty(seleniumCapabilityRequests) && seleniumCapabilityRequests.size() == 1) {
 				JSONObject seleniumCapability = seleniumCapabilityRequests.get(0);
 				env.put(Constant.LT_OPERATING_SYSTEM, seleniumCapability.getString(Constant.OPERATING_SYSTEM));
-				String selectedBrowser = seleniumCapability.getString(Constant.BROWSER);
-				if (allBrowsersData.containsKey(selectedBrowser)) {
-					Version brVersion = allBrowsersData.get(selectedBrowser);
-					env.put(Constant.LT_BROWSER_NAME, StringUtils.substringBefore(selectedBrowser, "-"));
-					env.put(Constant.LT_BROWSER_VERSION, brVersion.getVersion());
-				}
+				env.put(Constant.LT_BROWSER_NAME, seleniumCapability.getString(Constant.BROWSER_NAME));
+				env.put(Constant.LT_BROWSER_VERSION, seleniumCapability.getString(Constant.BROWSER_VERSION));
 				env.put(Constant.LT_RESOLUTION, seleniumCapability.getString(Constant.RESOLUTION));
 			}
-
-			env.put(Constant.LT_BROWSERS, createLTBrowsers(seleniumCapabilityRequests));
+			env.put(Constant.LT_BROWSERS, createBrowserJSON(seleniumCapabilityRequests));
 			env.put(Constant.LT_GRID_URL, gridURL);
 			env.put(Constant.LT_BUILD_NAME, buildname);
 			env.put(Constant.LT_BUILD_NUMBER, buildnumber);
@@ -164,13 +151,12 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 			super.buildEnvVars(env);
 		}
 
-		private String createLTBrowsers(List<JSONObject> seleniumCapabilityRequests) {
+		private String createBrowserJSON(List<JSONObject> seleniumCapabilityRequests) {
 			String config = Constant.NOT_AVAILABLE;
 			try {
 				ObjectMapper objectMapper = new ObjectMapper();
 				objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 				config = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(seleniumCapabilityRequests);
-
 			} catch (JsonProcessingException e) {
 				e.printStackTrace();
 			}

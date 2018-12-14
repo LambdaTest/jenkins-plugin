@@ -5,22 +5,24 @@ public class LambdaFreeStyleBuildAction extends AbstractFreeStyleBuildAction {
 	 * Holds info about the Selenium Test
 	 */
 	private String operatingSystem;
-	private String browser;
+	private String browserName;
+	private String browserVersion;
 	private String resolution;
 	private String buildName;
 	private String buildNumber;
 	private String testType;
 	private String iframeLink;
 
-	LambdaFreeStyleBuildAction(final String testType, final String operatingSystem, final String browser,
-			final String resolution) {
+	LambdaFreeStyleBuildAction(final String testType, final String operatingSystem, final String browserName,
+			final String browserVersion, final String resolution) {
 		super();
 		this.testType = testType;
 		this.operatingSystem = operatingSystem;
-		this.browser = browser;
+		this.browserName = browserName;
+		this.browserVersion = browserVersion;
 		this.resolution = resolution;
 		setIconFileName("document.png");
-		setDisplayName("LT(" + operatingSystem + " " + browser + " " + resolution + ")");
+		setDisplayName("LT(" + operatingSystem + " " + browserName + "-" + browserVersion + " " + resolution + ")");
 		setTestUrl(displayName);
 	}
 
@@ -32,12 +34,20 @@ public class LambdaFreeStyleBuildAction extends AbstractFreeStyleBuildAction {
 		this.operatingSystem = operatingSystem;
 	}
 
-	public String getBrowser() {
-		return browser;
+	public String getBrowserName() {
+		return browserName;
 	}
 
-	public void setBrowser(String browser) {
-		this.browser = browser;
+	public void setBrowserName(String browserName) {
+		this.browserName = browserName;
+	}
+
+	public String getBrowserVersion() {
+		return browserVersion;
+	}
+
+	public void setBrowserVersion(String browserVersion) {
+		this.browserVersion = browserVersion;
 	}
 
 	public String getResolution() {
@@ -76,10 +86,8 @@ public class LambdaFreeStyleBuildAction extends AbstractFreeStyleBuildAction {
 		return iframeLink;
 	}
 
-	public void setIframeLink(String buildNumber, String username, String accessToken) {
-		this.iframeLink = new StringBuilder("http://dev.lambdatest.io:3000/jenkins/?buildID=['").append(buildNumber)
-				.append("']&token=").append(accessToken).append("&username=").append(username).append("&auth=jenkins")
-				.toString();
+	public void setIframeLink(String iframeLink) {
+		this.iframeLink = iframeLink;
 	}
 
 }

@@ -10,7 +10,7 @@ public class MagicPlugWebsiteAction implements RootAction {
 	@Override
 	public String getIconFileName() {
 		System.out.println(Jenkins.RESOURCE_PATH + "/plugins/credentials/images/32x32/logo.png");
-		return (Jenkins.RESOURCE_PATH + "/plugins/credentials/images/32x32/logo.png");
+		return "document.png";
 	}
 
 	@Override
@@ -20,7 +20,7 @@ public class MagicPlugWebsiteAction implements RootAction {
 
 	@Override
 	public String getUrlName() {
-		return "https://app.lambdatest.com/";
+		return "https://www.lambdatest.com/";
 	}
 
 }

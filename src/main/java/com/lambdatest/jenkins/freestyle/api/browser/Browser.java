@@ -16,7 +16,7 @@ public class Browser {
     @JsonProperty("id")
     private String id;
     @JsonProperty("versions")
-    private List<Version> versions = null;
+    private List<BrowserVersion> browserVersions = null;
 
     @JsonProperty("id")
     public String getId() {
@@ -29,13 +29,13 @@ public class Browser {
     }
 
     @JsonProperty("versions")
-    public List<Version> getVersions() {
-        return versions;
+    public List<BrowserVersion> getVersions() {
+        return browserVersions;
     }
 
     @JsonProperty("versions")
-    public void setVersions(List<Version> versions) {
-        this.versions = versions;
+    public void setVersions(List<BrowserVersion> browserVersions) {
+        this.browserVersions = browserVersions;
     }
 
 }

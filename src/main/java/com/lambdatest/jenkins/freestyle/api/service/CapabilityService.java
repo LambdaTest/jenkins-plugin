@@ -1,15 +1,20 @@
 package com.lambdatest.jenkins.freestyle.api.service;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -23,43 +28,30 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lambdatest.jenkins.freestyle.api.Constant;
 import com.lambdatest.jenkins.freestyle.api.auth.UserAuthResponse;
 import com.lambdatest.jenkins.freestyle.api.browser.Browser;
-import com.lambdatest.jenkins.freestyle.api.osystem.Version;
+import com.lambdatest.jenkins.freestyle.api.browser.BrowserVersion;
 import com.lambdatest.jenkins.freestyle.api.osystem.OSList;
 
 public class CapabilityService {
 
-	public static Map<String, String> supportedOS = new HashMap<>();
-	public static List<String> supportedBrowsers;
-	public static Map<String, String> supportedResolutions = new HashMap<>();
-	public static Map<String, Version> allBrowserData = new HashMap<>();
+	public static Map<String, String> supportedOS = new LinkedHashMap<>();
+	public static Set<String> supportedBrowsers;
+	public static Map<String, Set<String>> allBrowserNames = new LinkedHashMap<>();
+	public static Map<VersionKey, List<BrowserVersion>> allBrowserVersions = new LinkedHashMap<>();
+
+	public static Set<String> supportedBrowserVersions;
+	public static Map<String, String> supportedResolutions = new LinkedHashMap<>();
 
 	public static Map<String, String> getOperatingSystems() {
 		try {
 			if (MapUtils.isEmpty(supportedOS)) {
-				supportedOS = new HashMap<>();
-				supportedResolutions = new HashMap<>();
-
-				HttpClient client = HttpClientBuilder.create().build();
-				HttpGet request = new HttpGet(Constant.OS_API_URL);
-
-				// add request header
-				request.addHeader("Content-Type", "application/json");
-				HttpResponse response = client.execute(request);
-
-				BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-
-				StringBuffer result = new StringBuffer();
-				String line = "";
-				while ((line = rd.readLine()) != null) {
-					result.append(line);
-				}
-				String jsonResponse = result.toString();
+				supportedOS = new LinkedHashMap<>();
+				supportedResolutions = new LinkedHashMap<>();
+				String jsonResponse = sendGetRequest(Constant.OS_API_URL);
 				ObjectMapper objectMapper = new ObjectMapper();
 				objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 				OSList osList = objectMapper.readValue(jsonResponse, OSList.class);
 				parseSupportedOsAndResolution(osList);
 			}
-
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -72,68 +64,59 @@ public class CapabilityService {
 				CapabilityService.supportedOS.put(os.getId(), os.getName());
 				CapabilityService.supportedResolutions.put(os.getId(), os.getResolution());
 			});
-			if (osList.getBrowsers() != null) {
-				osList.getBrowsers().forEach(br -> {
-					br.getVersions().forEach(version -> {
-						allBrowserData.put(version.getId(), version);
-					});
-				});
-			}
 		}
+
 	}
 
-	public static List<String> getBrowsers(String operatingSystem) {
-		supportedBrowsers = new ArrayList<String>();
+	public static Set<String> getBrowserNames(String operatingSystem) {
 		try {
-			String browserApiURL = Constant.BROWSER_API_URL + operatingSystem;
-
-			HttpClient client = HttpClientBuilder.create().build();
-			HttpGet request = new HttpGet(browserApiURL);
-
-			// add request header
-			request.addHeader("Content-Type", "application/json");
-			HttpResponse response = client.execute(request);
-
-			BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-
-			StringBuffer result = new StringBuffer();
-			String line = "";
-			while ((line = rd.readLine()) != null) {
-				result.append(line);
+			if (allBrowserNames.containsKey(operatingSystem)) {
+				System.out.println("Supported Browser List Exists for " + operatingSystem);
+				return allBrowserNames.get(operatingSystem);
 			}
-			String jsonResponse = result.toString();
-
+			supportedBrowsers = new LinkedHashSet<String>();
+			String browserApiURL = Constant.BROWSER_API_URL + operatingSystem;
+			String jsonResponse = sendGetRequest(browserApiURL);
 			ObjectMapper objectMapper = new ObjectMapper();
 			objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 			List<Browser> browsers = objectMapper.readValue(jsonResponse, new TypeReference<List<Browser>>() {
 			});
-			supportedBrowsers = parseSupportedBrowsers(supportedBrowsers, browsers);
+			parseSupportedBrowsers(browsers, operatingSystem);
 		} catch (Exception e) {
 			e.printStackTrace();
-			if (CollectionUtils.isEmpty(supportedBrowsers)) {
-				supportedBrowsers.add(Constant.NOT_AVAILABLE);
-			}
 		}
-
 		return supportedBrowsers;
-
 	}
 
-	private static List<String> parseSupportedBrowsers(List<String> browsers, List<Browser> browser) {
-
+	private static Set<String> parseSupportedBrowsers(List<Browser> browser, String operatingSystem) {
 		if (!CollectionUtils.isEmpty(browser)) {
 			browser.forEach(br -> {
+				supportedBrowsers.add(br.getId());
+				VersionKey vk = new VersionKey(operatingSystem, br.getId());
 				if (!CollectionUtils.isEmpty(br.getVersions())) {
-					br.getVersions().forEach(version -> {
-						browsers.add(version.getId());
-					});
+					allBrowserVersions.put(vk, br.getVersions());
 				}
 			});
+			allBrowserNames.put(operatingSystem, supportedBrowsers);
 		}
-		return browsers;
+		return supportedBrowsers;
 	}
 
-	public static List<String> getResolution(String operatingSystem) {
+	public static Set<String> getBrowserVersions(String operatingSystem, String browserName) {
+		supportedBrowserVersions = new LinkedHashSet<String>();
+		VersionKey vk = new VersionKey(operatingSystem, browserName);
+		if (allBrowserVersions.containsKey(vk)) {
+			allBrowserVersions.get(vk).forEach(bv -> {
+				supportedBrowserVersions.add(bv.getVersion());
+			});
+			;
+		} else {
+			System.out.println(vk + " not found");
+		}
+		return supportedBrowserVersions;
+	}
+
+	public static List<String> getResolutions(String operatingSystem) {
 		List<String> resolutions = new ArrayList<String>();
 		if (!MapUtils.isEmpty(supportedResolutions) && supportedResolutions.containsKey(operatingSystem)) {
 			String compactResolution = supportedResolutions.get(operatingSystem);
@@ -182,12 +165,70 @@ public class CapabilityService {
 		return validUser;
 	}
 
+	public boolean ping() {
+		try {
+			String jsonResponse = sendGetRequest(Constant.OS_API_URL);
+			if (StringUtils.isEmpty(jsonResponse)) {
+				return false;
+			} else {
+				return true;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	public static String buildIFrameLink(String buildNumber, String username, String accessToken) {
+		try {
+			StringBuilder sb = new StringBuilder(Constant.APP_URL);
+			sb.append("/jenkins/?buildID=[\"").append(buildNumber).append("\"]&token=").append(accessToken)
+					.append("&username=").append(username).append("&auth=jenkins");
+			return sb.toString();
+		} catch (Exception e) {
+			return Constant.NOT_AVAILABLE;
+		}
+	}
+
+	public static String buildHubURL(String username, String accessToken) {
+		try {
+			StringBuilder sb = new StringBuilder("https://");
+			sb.append(username).append(":").append(accessToken).append(Constant.HUB_URL);
+			return sb.toString();
+		} catch (Exception e) {
+			return Constant.NOT_AVAILABLE;
+		}
+	}
+
+	public static String sendGetRequest(String url) throws ClientProtocolException, IOException {
+		HttpClient client = HttpClientBuilder.create().build();
+		HttpGet request = new HttpGet(url);
+
+		// add request header
+		request.addHeader("Content-Type", "application/json");
+		HttpResponse response = client.execute(request);
+
+		BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+
+		StringBuffer result = new StringBuffer();
+		String line = "";
+		while ((line = rd.readLine()) != null) {
+			result.append(line);
+		}
+		return result.toString();
+	}
+
 	public static void main(String[] args) throws Exception {
 		// System.out.println(isValidUser("sushobhitd",
 		// "nao0GtdaCnq9GSc29ZTKQT90BrfzCUc8s9VRMVnMxf8WAtsDx3"));
 		System.out.println(getOperatingSystems());
-		System.out.println(allBrowserData);
-		
+		Set brs = getBrowserNames("win10");
+		System.out.println(brs);
+		System.out.println(getBrowserVersions("win10", "chrome"));
+		System.out.println(allBrowserVersions);
+		// List<String> s = getBrowserVersions("win10", "firefox");
+		// System.out.println(s);
+
 		// System.out.println(supportedOS);
 		// System.out.println(getResolution("win10"));
 		// getBrowsers("win10");

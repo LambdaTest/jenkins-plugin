@@ -17,14 +17,18 @@
     When submitted, it will be passed to the corresponding constructor parameter.
   -->
 	<f:block>
+		<f:validateButton title="Ping LambdaTest" progress="${%Checking availability of API...}" method="ping" />
 		<f:entry title="Selenium Tests">
 			<f:repeatable var="seleniumCapabilityRequest" items="${instance.seleniumCapabilityRequest}"  add="Add Selenium Test Capability">
 				<table width="100%">
 					<f:entry title="Operating System" field="operatingSystem">
 						<f:select value="${seleniumCapabilityRequest.operatingSystem}" />
 					</f:entry>
-					<f:entry title="Browser" progress="Loading" field="browser">
-						<f:select value="${seleniumCapabilityRequest.browser}" />
+					<f:entry title="Browser Name" progress="Loading" field="browserName">
+						<f:select value="${seleniumCapabilityRequest.browserName}" />
+					</f:entry>
+					<f:entry title="Browser Version" progress="Loading" field="browserVersion">
+						<f:select value="${seleniumCapabilityRequest.browserVersion}" />
 					</f:entry>
 					<f:entry title="Screen Resolution" field="resolution">
 						<f:select value="${seleniumCapabilityRequest.resolution}" />

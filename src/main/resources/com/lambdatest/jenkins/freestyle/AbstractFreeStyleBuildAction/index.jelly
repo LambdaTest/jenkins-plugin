@@ -28,7 +28,7 @@
 	        	</div>
        	 	</div>
         	<div class="iframe-container">
-            	<iframe src="https://ml.lambdatest.io/timeline" height="1000" width="1024"></iframe>
+            	<iframe src="${it.iframeLink}" height="1000" width="1024"></iframe>
             </div>
         </l:main-panel>
     </l:layout>

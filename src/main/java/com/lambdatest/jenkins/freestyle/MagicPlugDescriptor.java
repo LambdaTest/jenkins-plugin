@@ -1,8 +1,12 @@
 package com.lambdatest.jenkins.freestyle;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.ServletException;
 
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.QueryParameter;
@@ -18,6 +22,7 @@ import hudson.Extension;
 import hudson.model.AbstractProject;
 import hudson.model.ItemGroup;
 import hudson.tasks.BuildWrapperDescriptor;
+import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 
 @Extension
@@ -36,7 +41,7 @@ public class MagicPlugDescriptor extends BuildWrapperDescriptor {
 
 	@Override
 	public String getDisplayName() {
-		return "LambdaTest";
+		return "LAMBDATEST";
 	}
 
 	public MagicPlugDescriptor() {
@@ -44,7 +49,22 @@ public class MagicPlugDescriptor extends BuildWrapperDescriptor {
 		load();
 	}
 
+	public FormValidation doPing() throws IOException, ServletException {
+		System.out.println("doPing");
+		if (new CapabilityService().ping()) {
+			return FormValidation.ok("Ping Successful");
+		} else {
+			return FormValidation.error("Ping Failed");
+		}
+	}
+
+	/**
+	 * Return list of supported `operatingSystem`
+	 * 
+	 * @return ListBoxModel
+	 */
 	public ListBoxModel doFillOperatingSystemItems() {
+		System.out.println("doFillOperatingSystemItems");
 		Map<String, String> supportedOS = CapabilityService.getOperatingSystems();
 		ListBoxModel items = new ListBoxModel();
 		items.add(Constant.DEFAULT_OPERATING_SYSTEM_VALUE, Constant.EMPTY);
@@ -54,17 +74,34 @@ public class MagicPlugDescriptor extends BuildWrapperDescriptor {
 		return items;
 	}
 
-	public ListBoxModel doFillBrowserItems(@QueryParameter String operatingSystem) {
+	public ListBoxModel doFillBrowserNameItems(@QueryParameter String operatingSystem) {
 		ListBoxModel items = new ListBoxModel();
 		if (StringUtils.isBlank(operatingSystem)) {
-			items.add(Constant.DEFAULT_BROWSER_VALUE, Constant.EMPTY);
+			items.add(Constant.DEFAULT_BROWSER_NAME_VALUE, Constant.EMPTY);
 			return items;
 		}
 		System.out.println(operatingSystem);
-		List<String> supportedBrowsers = CapabilityService.getBrowsers(operatingSystem);
+		Set<String> supportedBrowsers = CapabilityService.getBrowserNames(operatingSystem);
 		if (!CollectionUtils.isEmpty(supportedBrowsers)) {
 			supportedBrowsers.forEach(br -> {
 				items.add(br, br);
+			});
+		}
+		return items;
+	}
+
+	public ListBoxModel doFillBrowserVersionItems(@QueryParameter String operatingSystem,
+			@QueryParameter String browserName) {
+		ListBoxModel items = new ListBoxModel();
+		if (StringUtils.isBlank(operatingSystem) || StringUtils.isBlank(browserName)) {
+			items.add(Constant.DEFAULT_BROWSER_VERSION_VALUE, Constant.EMPTY);
+			return items;
+		}
+		System.out.println(operatingSystem + ":::" + browserName);
+		Set<String> supportedBrowserVersions = CapabilityService.getBrowserVersions(operatingSystem, browserName);
+		if (!CollectionUtils.isEmpty(supportedBrowserVersions)) {
+			supportedBrowserVersions.forEach(ver -> {
+				items.add(ver, ver);
 			});
 		}
 		return items;
@@ -77,7 +114,7 @@ public class MagicPlugDescriptor extends BuildWrapperDescriptor {
 			return items;
 		}
 		System.out.println(operatingSystem);
-		List<String> supportedBrowsers = CapabilityService.getResolution(operatingSystem);
+		List<String> supportedBrowsers = CapabilityService.getResolutions(operatingSystem);
 		if (!CollectionUtils.isEmpty(supportedBrowsers)) {
 			supportedBrowsers.forEach(br -> {
 				items.add(br, br);
