@@ -64,7 +64,6 @@ public class MagicPlugDescriptor extends BuildWrapperDescriptor {
 	 * @return ListBoxModel
 	 */
 	public ListBoxModel doFillOperatingSystemItems() {
-		System.out.println("doFillOperatingSystemItems");
 		Map<String, String> supportedOS = CapabilityService.getOperatingSystems();
 		ListBoxModel items = new ListBoxModel();
 		items.add(Constant.DEFAULT_OPERATING_SYSTEM_VALUE, Constant.EMPTY);
@@ -93,11 +92,11 @@ public class MagicPlugDescriptor extends BuildWrapperDescriptor {
 	public ListBoxModel doFillBrowserVersionItems(@QueryParameter String operatingSystem,
 			@QueryParameter String browserName) {
 		ListBoxModel items = new ListBoxModel();
+		System.out.println(operatingSystem + "::" + browserName);
 		if (StringUtils.isBlank(operatingSystem) || StringUtils.isBlank(browserName)) {
 			items.add(Constant.DEFAULT_BROWSER_VERSION_VALUE, Constant.EMPTY);
 			return items;
 		}
-		System.out.println(operatingSystem + ":::" + browserName);
 		Set<String> supportedBrowserVersions = CapabilityService.getBrowserVersions(operatingSystem, browserName);
 		if (!CollectionUtils.isEmpty(supportedBrowserVersions)) {
 			supportedBrowserVersions.forEach(ver -> {

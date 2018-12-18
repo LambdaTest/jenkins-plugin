@@ -71,7 +71,7 @@ public class MagicPlugCredentialsImpl extends BaseStandardCredentials implements
 
 		@Override
 		public String getDisplayName() {
-			return "MagicPlug Credentials";
+			return "LAMBDATEST Credentials";
 		}
 
 		@Override

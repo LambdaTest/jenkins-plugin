@@ -30,23 +30,26 @@ import net.sf.json.JSONObject;
 @SuppressWarnings("serial")
 public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable {
 
-	private List<JSONObject> seleniumCapabilityRequests = null;
+	private List<JSONObject> seleniumCapabilityRequest;
 	private String username;
 	private String accessToken;
 	private String gridURL;
+	private String choice;
 
 	@DataBoundConstructor
 	public MagicPlugBuildWrapper(StaplerRequest req, @CheckForNull List<JSONObject> seleniumCapabilityRequest,
-			@CheckForNull String credentialsId, ItemGroup context) throws Exception {
+			@CheckForNull String credentialsId, String choice, ItemGroup context) throws Exception {
 		try {
 			System.out.println(credentialsId);
+			System.out.println("choice: " + choice);
 			if (seleniumCapabilityRequest == null) {
 				// prevent null pointer
-				this.seleniumCapabilityRequests = new ArrayList<JSONObject>();
+				this.seleniumCapabilityRequest = new ArrayList<JSONObject>();
 			} else {
 				System.out.println(seleniumCapabilityRequest);
 				validateTestInput(seleniumCapabilityRequest);
-				this.seleniumCapabilityRequests = seleniumCapabilityRequest;
+				this.seleniumCapabilityRequest = seleniumCapabilityRequest;
+				this.choice = choice;
 				setCredentials(credentialsId, context);
 			}
 		} catch (Exception e) {
@@ -86,21 +89,21 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 		String buildnumber = String.valueOf(build.getNumber());
 		System.out.println("buildname :" + buildname);
 		System.out.println("buildnumber :" + buildnumber);
-		for (JSONObject seleniumCapabilityRequest : seleniumCapabilityRequests) {
+		for (JSONObject seleniumCapabilityRequest : seleniumCapabilityRequest) {
 			createFreeStyleBuildActions(build, buildname, buildnumber, seleniumCapabilityRequest, this.username,
-					this.accessToken);
+					this.accessToken, this.choice);
 		}
 		System.out.println("Adding LT actions done");
 
 		// Create Grid URL
-		this.gridURL = CapabilityService.buildHubURL(this.username, this.accessToken);
+		this.gridURL = CapabilityService.buildHubURL(this.username, this.accessToken, this.choice);
 		System.out.println(this.gridURL);
 		System.out.println("Environment setUp() -end");
 		return new MagicPlugEnvironment(build);
 	}
 
 	public static void createFreeStyleBuildActions(AbstractBuild build, String buildname, String buildnumber,
-			JSONObject seleniumCapabilityRequest, String username, String accessToken) {
+			JSONObject seleniumCapabilityRequest, String username, String accessToken, String choice) {
 		String operatingSystem = seleniumCapabilityRequest.getString(Constant.OPERATING_SYSTEM);
 		String browserName = seleniumCapabilityRequest.getString(Constant.BROWSER_NAME);
 		String browserVersion = seleniumCapabilityRequest.getString(Constant.BROWSER_VERSION);
@@ -111,7 +114,7 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 		lfsBuildAction.setBuild(build);
 		lfsBuildAction.setBuildName(buildname);
 		lfsBuildAction.setBuildNumber(buildnumber);
-		lfsBuildAction.setIframeLink(CapabilityService.buildIFrameLink(buildnumber, username, accessToken));
+		lfsBuildAction.setIframeLink(CapabilityService.buildIFrameLink(buildnumber, username, accessToken, choice));
 		build.addAction(lfsBuildAction);
 	}
 
@@ -133,19 +136,19 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 			String buildname = build.getFullDisplayName().substring(0,
 					build.getFullDisplayName().length() - (String.valueOf(build.getNumber()).length() + 1));
 			String buildnumber = String.valueOf(build.getNumber());
-			if (!CollectionUtils.isEmpty(seleniumCapabilityRequests) && seleniumCapabilityRequests.size() == 1) {
-				JSONObject seleniumCapability = seleniumCapabilityRequests.get(0);
+			if (!CollectionUtils.isEmpty(seleniumCapabilityRequest) && seleniumCapabilityRequest.size() == 1) {
+				JSONObject seleniumCapability = seleniumCapabilityRequest.get(0);
 				env.put(Constant.LT_OPERATING_SYSTEM, seleniumCapability.getString(Constant.OPERATING_SYSTEM));
 				env.put(Constant.LT_BROWSER_NAME, seleniumCapability.getString(Constant.BROWSER_NAME));
 				env.put(Constant.LT_BROWSER_VERSION, seleniumCapability.getString(Constant.BROWSER_VERSION));
 				env.put(Constant.LT_RESOLUTION, seleniumCapability.getString(Constant.RESOLUTION));
 			}
-			env.put(Constant.LT_BROWSERS, createBrowserJSON(seleniumCapabilityRequests));
+			env.put(Constant.LT_BROWSERS, createBrowserJSON(seleniumCapabilityRequest));
 			env.put(Constant.LT_GRID_URL, gridURL);
 			env.put(Constant.LT_BUILD_NAME, buildname);
 			env.put(Constant.LT_BUILD_NUMBER, buildnumber);
 			env.put(Constant.USERNAME, username);
-			env.put(Constant.ACCESS_TOKEN, accessToken);
+			// env.put(Constant.ACCESS_TOKEN, accessToken);
 
 			System.out.println(env);
 			super.buildEnvVars(env);

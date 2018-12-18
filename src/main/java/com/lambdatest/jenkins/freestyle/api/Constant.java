@@ -20,15 +20,25 @@ public interface Constant {
 	String BROWSER_VERSION = "browserVersion";
 	String RESOLUTION = "resolution";
 
-	String OS_API_URL = "https://stage-api.lambdatest.com/api/v1/capability?format=array";
-	String BROWSER_API_URL = "https://stage-api.lambdatest.com/api/v1/capability?format=array&os=";
-	String AUTH_API_URL = "https://stage-accounts.lambdatest.com/api/user/token/auth";
-	String APP_URL = "https://stage-automation.lambdatest.com";
-	String HUB_URL = "@stage-hub.lambdatest.com/wd/hub";
+	String OS_API_URL = "https://dev-api.lambdatest.com/api/v1/capability?format=array";
+	String BROWSER_API_URL = "https://dev-api.lambdatest.com/api/v1/capability?format=array&os=";
+	String AUTH_API_URL = "https://dev-accounts.lambdatest.com/api/user/token/auth";
 	
+	interface Stage {
+		String APP_URL = "https://stage-automation.lambdatest.com";
+		String HUB_URL = "@stage-hub.lambdatest.com/wd/hub";
+	}
+	
+	interface Dev {
+		String APP_URL = "https://dev-automation.lambdatest.com";
+		String HUB_URL = "@dev-hub.lambdatest.com/wd/hub";
+	}
 
 	String DEFAULT_OPERATING_SYSTEM_VALUE = "Select Operating System";
 	String DEFAULT_BROWSER_NAME_VALUE = "Select BrowserName";
 	String DEFAULT_BROWSER_VERSION_VALUE = "Select BrowserVersion";
 	String DEFAULT_RESOLUTION_VALUE = "Select Screen Resolution";
+	
+	String STAGE = "stage";
+	String DEV = "dev";
 }

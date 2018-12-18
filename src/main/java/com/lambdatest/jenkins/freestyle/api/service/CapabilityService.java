@@ -91,8 +91,8 @@ public class CapabilityService {
 	private static Set<String> parseSupportedBrowsers(List<Browser> browser, String operatingSystem) {
 		if (!CollectionUtils.isEmpty(browser)) {
 			browser.forEach(br -> {
-				supportedBrowsers.add(br.getId());
-				VersionKey vk = new VersionKey(operatingSystem, br.getId());
+				supportedBrowsers.add(br.getName());
+				VersionKey vk = new VersionKey(operatingSystem, br.getName());
 				if (!CollectionUtils.isEmpty(br.getVersions())) {
 					allBrowserVersions.put(vk, br.getVersions());
 				}
@@ -104,14 +104,17 @@ public class CapabilityService {
 
 	public static Set<String> getBrowserVersions(String operatingSystem, String browserName) {
 		supportedBrowserVersions = new LinkedHashSet<String>();
+		System.out.println("\n*** START ***");
+		//System.out.println(allBrowserVersions.keySet().toString());
+		System.out.println("\n*** END ***");
 		VersionKey vk = new VersionKey(operatingSystem, browserName);
 		if (allBrowserVersions.containsKey(vk)) {
 			allBrowserVersions.get(vk).forEach(bv -> {
 				supportedBrowserVersions.add(bv.getVersion());
 			});
-			;
 		} else {
 			System.out.println(vk + " not found");
+			System.out.println("\n*** NOT FOUND ***");
 		}
 		return supportedBrowserVersions;
 	}
@@ -179,9 +182,14 @@ public class CapabilityService {
 		}
 	}
 
-	public static String buildIFrameLink(String buildNumber, String username, String accessToken) {
+	public static String buildIFrameLink(String buildNumber, String username, String accessToken, String type) {
 		try {
-			StringBuilder sb = new StringBuilder(Constant.APP_URL);
+			StringBuilder sb = new StringBuilder();
+			if (Constant.STAGE.equals(type)) {
+				sb.append(Constant.Stage.APP_URL);
+			} else if (Constant.DEV.equals(type)) {
+				sb.append(Constant.Dev.APP_URL);
+			}
 			sb.append("/jenkins/?buildID=[\"").append(buildNumber).append("\"]&token=").append(accessToken)
 					.append("&username=").append(username).append("&auth=jenkins");
 			return sb.toString();
@@ -190,10 +198,15 @@ public class CapabilityService {
 		}
 	}
 
-	public static String buildHubURL(String username, String accessToken) {
+	public static String buildHubURL(String username, String accessToken, String type) {
 		try {
 			StringBuilder sb = new StringBuilder("https://");
-			sb.append(username).append(":").append(accessToken).append(Constant.HUB_URL);
+			sb.append(username).append(":").append(accessToken);
+			if (Constant.STAGE.equals(type)) {
+				sb.append(Constant.Stage.HUB_URL);
+			} else if (Constant.DEV.equals(type)) {
+				sb.append(Constant.Dev.HUB_URL);
+			}
 			return sb.toString();
 		} catch (Exception e) {
 			return Constant.NOT_AVAILABLE;
