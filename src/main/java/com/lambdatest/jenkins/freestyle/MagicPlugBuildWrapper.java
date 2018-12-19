@@ -31,6 +31,7 @@ import net.sf.json.JSONObject;
 public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable {
 
 	private List<JSONObject> seleniumCapabilityRequest;
+	private String credentialsId;
 	private String username;
 	private String accessToken;
 	private String gridURL;
@@ -51,6 +52,7 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 				this.seleniumCapabilityRequest = seleniumCapabilityRequest;
 				this.choice = choice;
 				setCredentials(credentialsId, context);
+				setCredentialsId(credentialsId);
 			}
 		} catch (Exception e) {
 			throw e;
@@ -175,6 +177,54 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 			return super.tearDown(build, listener);
 		}
 
+	}
+
+	public List<JSONObject> getSeleniumCapabilityRequest() {
+		return seleniumCapabilityRequest;
+	}
+
+	public void setSeleniumCapabilityRequest(List<JSONObject> seleniumCapabilityRequest) {
+		this.seleniumCapabilityRequest = seleniumCapabilityRequest;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public String getAccessToken() {
+		return accessToken;
+	}
+
+	public void setAccessToken(String accessToken) {
+		this.accessToken = accessToken;
+	}
+
+	public String getGridURL() {
+		return gridURL;
+	}
+
+	public void setGridURL(String gridURL) {
+		this.gridURL = gridURL;
+	}
+
+	public String getChoice() {
+		return choice;
+	}
+
+	public void setChoice(String choice) {
+		this.choice = choice;
+	}
+
+	public String getCredentialsId() {
+		return credentialsId;
+	}
+
+	public void setCredentialsId(String credentialsId) {
+		this.credentialsId = credentialsId;
 	}
 
 }

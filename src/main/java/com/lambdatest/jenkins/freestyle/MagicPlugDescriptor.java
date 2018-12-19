@@ -93,7 +93,10 @@ public class MagicPlugDescriptor extends BuildWrapperDescriptor {
 			@QueryParameter String browserName) {
 		ListBoxModel items = new ListBoxModel();
 		System.out.println(operatingSystem + "::" + browserName);
-		if (StringUtils.isBlank(operatingSystem) || StringUtils.isBlank(browserName)) {
+		if (!StringUtils.isBlank(operatingSystem) && StringUtils.isBlank(browserName)) {
+			browserName="Chrome";
+			System.out.println("Chrome added");
+		}else if (StringUtils.isBlank(operatingSystem) || StringUtils.isBlank(browserName)) {
 			items.add(Constant.DEFAULT_BROWSER_VERSION_VALUE, Constant.EMPTY);
 			return items;
 		}

@@ -9,8 +9,8 @@ public class MagicPlugWebsiteAction implements RootAction {
 
 	@Override
 	public String getIconFileName() {
-		System.out.println(Jenkins.RESOURCE_PATH + "/plugins/credentials/images/32x32/logo.png");
-		return "document.png";
+		System.out.println(Jenkins.RESOURCE_PATH + "/plugins/images/logo.png");
+		return "/plugins/images/logo.png";
 	}
 
 	@Override
