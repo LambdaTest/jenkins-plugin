@@ -1,3 +1,8 @@
 /.gradle/
 /build/
 /target/
+
+*.css
+*.html
+*.gif
+*.xml
