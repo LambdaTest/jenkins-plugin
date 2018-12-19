@@ -14,7 +14,8 @@ plugins {
 
 group = 'org.jenkins-ci.plugins'
 version = '1.0-SNAPSHOT'
-description = 'LambdaTest Jenkins Plugin'
+description = 'LambdaTest Jenkins Plugin is used to run automated selenium tests on LambdaTest Cloud'
+
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -24,10 +25,13 @@ jenkinsPlugin {
     coreVersion = '2.138'
 
     // ID of the plugin, defaults to the project name without trailing '-plugin'
-    shortName = 'magic-plug'
+    shortName = 'lambdatest-automation'
 
     // human-readable name of plugin                                               
     displayName = 'Magic Plug with Gradle'
+    
+    // human-readable name of plugin 
+    name = 'LambdaTest Automation Plugin'
 
 	// use the plugin class loader before the core class loader, defaults to false
     pluginFirstClassLoader = true
@@ -67,8 +71,8 @@ jenkinsPlugin {
     // the licenses section is optional, and corresponds to the POM licenses section
     licenses {
         license {
-            name 'Apache License, Version 2.0'
-            url 'https://www.apache.org/licenses/LICENSE-2.0.txt'
+            name 'Mozilla Public License 2.0'
+            url 'https://www.mozilla.org/en-US/MPL/2.0/'
             distribution 'repo'
             comments 'A business-friendly OSS license'
         }
