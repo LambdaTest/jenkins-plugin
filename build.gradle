@@ -14,7 +14,7 @@ plugins {
 
 group = 'org.jenkins-ci.plugins'
 version = '1.0-SNAPSHOT'
-description = 'LambdaTest Jenkins Plugin is used to run automated selenium tests on LambdaTest Cloud'
+description = 'LambdaTest Plugin is used to run automated selenium tests on LambdaTest Cloud'
 
 
 sourceCompatibility = 1.8
