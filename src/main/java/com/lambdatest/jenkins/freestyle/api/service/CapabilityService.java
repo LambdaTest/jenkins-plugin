@@ -10,6 +10,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
@@ -33,6 +34,8 @@ import com.lambdatest.jenkins.freestyle.api.osystem.OSList;
 
 public class CapabilityService {
 
+	private final static Logger logger = Logger.getLogger(CapabilityService.class.getName());
+
 	public static Map<String, String> supportedOS = new LinkedHashMap<>();
 	public static Set<String> supportedBrowsers;
 	public static Map<String, Set<String>> allBrowserNames = new LinkedHashMap<>();
@@ -53,7 +56,7 @@ public class CapabilityService {
 				parseSupportedOsAndResolution(osList);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.warning(e.getMessage());
 		}
 		return CapabilityService.supportedOS;
 	}
@@ -83,7 +86,7 @@ public class CapabilityService {
 			});
 			parseSupportedBrowsers(browsers, operatingSystem);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.warning(e.getMessage());
 		}
 		return supportedBrowsers;
 	}
@@ -105,7 +108,7 @@ public class CapabilityService {
 	public static Set<String> getBrowserVersions(String operatingSystem, String browserName) {
 		supportedBrowserVersions = new LinkedHashSet<String>();
 		System.out.println("\n*** START ***");
-		//System.out.println(allBrowserVersions.keySet().toString());
+		// System.out.println(allBrowserVersions.keySet().toString());
 		System.out.println("\n*** END ***");
 		VersionKey vk = new VersionKey(operatingSystem, browserName);
 		if (allBrowserVersions.containsKey(vk)) {
@@ -163,7 +166,7 @@ public class CapabilityService {
 			}
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.warning(e.getMessage());
 		}
 		return validUser;
 	}
@@ -177,7 +180,7 @@ public class CapabilityService {
 				return true;
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.warning(e.getMessage());
 			return false;
 		}
 	}
@@ -189,6 +192,8 @@ public class CapabilityService {
 				sb.append(Constant.Stage.APP_URL);
 			} else if (Constant.DEV.equals(type)) {
 				sb.append(Constant.Dev.APP_URL);
+			} else if (Constant.BETA.equals(type)) {
+				sb.append(Constant.Beta.APP_URL);
 			}
 			sb.append("/jenkins/?buildID=[\"").append(buildNumber).append("\"]&token=").append(accessToken)
 					.append("&username=").append(username).append("&auth=jenkins");
@@ -206,6 +211,8 @@ public class CapabilityService {
 				sb.append(Constant.Stage.HUB_URL);
 			} else if (Constant.DEV.equals(type)) {
 				sb.append(Constant.Dev.HUB_URL);
+			} else if (Constant.BETA.equals(type)) {
+				sb.append(Constant.Beta.HUB_URL);
 			}
 			return sb.toString();
 		} catch (Exception e) {
@@ -218,7 +225,7 @@ public class CapabilityService {
 		HttpGet request = new HttpGet(url);
 
 		// add request header
-		request.addHeader("Content-Type", "application/json");
+		// request.addHeader("Content-Type", "application/json");
 		HttpResponse response = client.execute(request);
 
 		BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
@@ -232,19 +239,10 @@ public class CapabilityService {
 	}
 
 	public static void main(String[] args) throws Exception {
-		// System.out.println(isValidUser("sushobhitd",
-		// "nao0GtdaCnq9GSc29ZTKQT90BrfzCUc8s9VRMVnMxf8WAtsDx3"));
 		System.out.println(getOperatingSystems());
-		Set brs = getBrowserNames("win10");
-		System.out.println(brs);
+		System.out.println(getBrowserNames("win10"));
 		System.out.println(getBrowserVersions("win10", "chrome"));
 		System.out.println(allBrowserVersions);
-		// List<String> s = getBrowserVersions("win10", "firefox");
-		// System.out.println(s);
-
-		// System.out.println(supportedOS);
-		// System.out.println(getResolution("win10"));
-		// getBrowsers("win10");
 	}
 
 }

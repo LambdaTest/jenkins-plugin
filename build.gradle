@@ -16,7 +16,6 @@ group = 'org.jenkins-ci.plugins'
 version = '1.0-SNAPSHOT'
 description = 'LambdaTest Plugin is used to run automated selenium tests on LambdaTest Cloud'
 
-
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
@@ -28,10 +27,10 @@ jenkinsPlugin {
     shortName = 'lambdatest-automation'
 
     // human-readable name of plugin                                               
-    displayName = 'Magic Plug with Gradle'
+    displayName = 'LambdaTest Automation Plugin'
     
     // human-readable name of plugin 
-    name = 'LambdaTest Automation Plugin'
+    //name = 'LambdaTest Automation Plugin'
 
 	// use the plugin class loader before the core class loader, defaults to false
     pluginFirstClassLoader = true

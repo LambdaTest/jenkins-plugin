@@ -8,15 +8,16 @@ import com.cloudbees.plugins.credentials.common.StandardCredentials;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Util;
+import hudson.util.Secret;
 
 @NameWith(value = MagicPlugCredentials.NameProvider.class, priority = 1)
 public interface MagicPlugCredentials extends StandardCredentials {
 	String getUserName();
 
-	String getAccessToken();
+	Secret getAccessToken();
 
 	String getDisplayName();
-	
+
 	public class NameProvider extends CredentialsNameProvider<MagicPlugCredentials> {
 
 		/**
