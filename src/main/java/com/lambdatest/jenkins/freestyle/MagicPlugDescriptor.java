@@ -1,7 +1,6 @@
 package com.lambdatest.jenkins.freestyle;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,12 +26,6 @@ import hudson.util.ListBoxModel;
 
 @Extension
 public class MagicPlugDescriptor extends BuildWrapperDescriptor {
-
-	private static final Map<String, OsConfig> operatingSystems = new HashMap<>();
-	static {
-		operatingSystems.put("win10", new OsConfig());
-		operatingSystems.put("sierra", new OsConfig());
-	}
 
 	@Override
 	public boolean isApplicable(AbstractProject<?, ?> item) {
@@ -94,9 +87,9 @@ public class MagicPlugDescriptor extends BuildWrapperDescriptor {
 		ListBoxModel items = new ListBoxModel();
 		System.out.println(operatingSystem + "::" + browserName);
 		if (!StringUtils.isBlank(operatingSystem) && StringUtils.isBlank(browserName)) {
-			browserName="Chrome";
+			browserName = "Chrome";
 			System.out.println("Chrome added");
-		}else if (StringUtils.isBlank(operatingSystem) || StringUtils.isBlank(browserName)) {
+		} else if (StringUtils.isBlank(operatingSystem) || StringUtils.isBlank(browserName)) {
 			items.add(Constant.DEFAULT_BROWSER_VERSION_VALUE, Constant.EMPTY);
 			return items;
 		}

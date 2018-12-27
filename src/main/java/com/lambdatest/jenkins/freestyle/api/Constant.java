@@ -22,13 +22,18 @@ public interface Constant {
 
 	String OS_API_URL = "https://dev-api.lambdatest.com/api/v1/capability?format=array";
 	String BROWSER_API_URL = "https://dev-api.lambdatest.com/api/v1/capability?format=array&os=";
-	String AUTH_API_URL = "https://dev-accounts.lambdatest.com/api/user/token/auth";
-	
+	String AUTH_API_URL = "https://beta-accounts.lambdatest.com/api/user/token/auth";
+
 	interface Stage {
 		String APP_URL = "https://stage-automation.lambdatest.com";
 		String HUB_URL = "@stage-hub.lambdatest.com/wd/hub";
 	}
-	
+
+	interface Beta {
+		String APP_URL = "https://beta-automation.lambdatest.com";
+		String HUB_URL = "@beta-hub.lambdatest.com/wd/hub";
+	}
+
 	interface Dev {
 		String APP_URL = "https://dev-automation.lambdatest.com";
 		String HUB_URL = "@dev-hub.lambdatest.com/wd/hub";
@@ -38,7 +43,21 @@ public interface Constant {
 	String DEFAULT_BROWSER_NAME_VALUE = "Select BrowserName";
 	String DEFAULT_BROWSER_VERSION_VALUE = "Select BrowserVersion";
 	String DEFAULT_RESOLUTION_VALUE = "Select Screen Resolution";
-	
+
 	String STAGE = "stage";
 	String DEV = "dev";
+	String BETA = "beta";
+
+	String MAC_HASH_URL = "https://d190rtvbt0l12i.cloudfront.net/mac/latest";
+	String MAC_BINARY_URL = "https://d190rtvbt0l12i.cloudfront.net/mac/LTC-mac.sh";
+
+	String LINUX_HASH_URL = "https://d190rtvbt0l12i.cloudfront.net/linux/latest";
+	String LINUX_BINARY_URL = "https://d190rtvbt0l12i.cloudfront.net/linux/LTC.sh";
+
+	String WIN_HASH_URL = "https://d190rtvbt0l12i.cloudfront.net/windows/latest";
+	String WIN_BINARY_URL = "https://d190rtvbt0l12i.cloudfront.net/windows/LTC.exe";
+	
+	String DEFAULT_TUNNEL_NAME = "jenkins-tunnel";
+	String LT_TUNNEL_NAME = "LT_TUNNEL_NAME";
+
 }
