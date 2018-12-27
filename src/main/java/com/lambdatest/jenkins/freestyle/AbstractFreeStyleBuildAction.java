@@ -1,10 +1,10 @@
 package com.lambdatest.jenkins.freestyle;
 
-import hudson.model.AbstractBuild;
 import hudson.model.Action;
+import hudson.model.Run;
 
 public abstract class AbstractFreeStyleBuildAction implements Action {
-	private AbstractBuild<?, ?> build;
+	private Run<?, ?> build;
 
 	protected String displayName;
 	protected String iconFileName;
@@ -25,14 +25,14 @@ public abstract class AbstractFreeStyleBuildAction implements Action {
 		return testUrl;
 	}
 
-	public AbstractBuild<?, ?> getBuild() {
+	public Run<?, ?> getBuild() {
 		return build;
 	}
 
-	public void setBuild(AbstractBuild<?, ?> build) {
+	public void setBuild(Run<?, ?> build) {
 		this.build = build;
 	}
-	
+
 	public void setIconFileName(String iconFileName) {
 		this.iconFileName = iconFileName;
 	}
@@ -48,7 +48,7 @@ public abstract class AbstractFreeStyleBuildAction implements Action {
 		}
 		displayName = dn;
 	}
-	
+
 	public void setTestUrl(String testUrl) {
 		this.testUrl = testUrl.replaceAll("[:.()|/ ]", "").toLowerCase();
 	}

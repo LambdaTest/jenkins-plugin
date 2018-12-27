@@ -24,12 +24,13 @@ import hudson.Extension;
 import hudson.model.ItemGroup;
 import hudson.security.ACL;
 import hudson.util.FormValidation;
+import hudson.util.Secret;
 
 public class MagicPlugCredentialsImpl extends BaseStandardCredentials implements MagicPlugCredentials {
 
 	private static final long serialVersionUID = 1L;
 	private final String username;
-	private final String accessToken;
+	private final Secret accessToken;
 
 	@DataBoundConstructor
 	public MagicPlugCredentialsImpl(CredentialsScope scope, String id, String description, String username,
@@ -38,7 +39,7 @@ public class MagicPlugCredentialsImpl extends BaseStandardCredentials implements
 		try {
 			System.out.println("MagicPlugCredentialsImpl");
 			this.username = username;
-			this.accessToken = accessToken;
+			this.accessToken = Secret.fromString(accessToken);
 			System.out.println("Here We can Verify Credentials Also before Adding");
 			if (!CapabilityService.isValidUser(username, accessToken)) {
 				throw new Exception("Invalid username and access Token");
@@ -127,9 +128,9 @@ public class MagicPlugCredentialsImpl extends BaseStandardCredentials implements
 	}
 
 	@Override
-	public String getAccessToken() {
+	public Secret getAccessToken() {
 		if (this.accessToken == null) {
-			return Constant.NOT_AVAILABLE;
+			return Secret.fromString(Constant.NOT_AVAILABLE);
 		} else {
 			return this.accessToken;
 		}
