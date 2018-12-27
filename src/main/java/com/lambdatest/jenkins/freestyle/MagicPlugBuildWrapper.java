@@ -81,14 +81,17 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 		System.out.println("Tunnel Config:" + localTunnel);
 		if (StringUtils.isBlank(localTunnel.getTunnelName())) {
 			localTunnel.setTunnelName(Constant.DEFAULT_TUNNEL_NAME);
+			this.localTunnel.setTunnelName(Constant.DEFAULT_TUNNEL_NAME);
 		}
-		StringBuilder sb = new StringBuilder(localTunnel.getTunnelName()).append("-").append(buildname).append("-")
-				.append(buildnumber);
-		String tunnelNameExt = sb.toString();
-		localTunnel.setTunnelName(tunnelNameExt);
-		this.localTunnel.setTunnelName(tunnelNameExt);
+		String tunnelNameExt = getTunnelIdentifierExtended(localTunnel.getTunnelName(),buildname,buildnumber);
 		this.tunnelProcess = LambdaTunnelService.setUp(this.username, this.accessToken.getPlainText(),
-				localTunnel.getTunnelName());
+				tunnelNameExt);
+	}
+
+	private String getTunnelIdentifierExtended(String tunnelName, String buildname, String buildnumber) {
+		StringBuilder sb = new StringBuilder(tunnelName.trim()).append("-").append(buildname.trim()).append("-")
+				.append(buildnumber);
+		return sb.toString();
 	}
 
 	private void validateTestInput(List<JSONObject> seleniumCapabilityRequest) {
@@ -186,7 +189,7 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 			env.put(Constant.LT_BUILD_NAME, buildname);
 			env.put(Constant.LT_BUILD_NUMBER, buildnumber);
 			if (localTunnel != null) {
-				env.put(Constant.LT_TUNNEL_NAME, localTunnel.getTunnelName());
+				env.put(Constant.LT_TUNNEL_NAME, getTunnelIdentifierExtended(localTunnel.getTunnelName(),buildname,buildnumber));
 			}
 			env.put(Constant.USERNAME, username);
 			System.out.println(env);
