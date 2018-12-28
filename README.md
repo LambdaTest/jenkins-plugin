@@ -29,7 +29,7 @@ https://github.com/jenkinsci/gradle-jpi-plugin
 
 ## Release Instructions
 
-For new `releases`, update `version` field in `build.gradle`
+For new `releases`, bump `version` field in `build.gradle`, then execute the following command
 
 ```bash
 $ gradle release -Prelease.useAutomaticVersion=true
