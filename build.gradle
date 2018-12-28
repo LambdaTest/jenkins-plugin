@@ -121,11 +121,5 @@ repositories {
 }
 
 release {
-  	failOnUnversionedFiles = false
-  	failOnCommitNeeded = false
-	failOnPublishNeeded = false
-	failOnSnapshotDependencies = false
-	failOnUnversionedFiles = false
-	failOnUpdateNeeded = false
-	revertOnFail = false
+  	
 }
