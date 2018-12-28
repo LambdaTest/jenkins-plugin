@@ -10,6 +10,7 @@ plugins {
     // Apply the java-library plugin to add support for Java Library
     id 'java-library'
     id 'org.jenkins-ci.jpi' version '0.27.0'
+    id 'net.researchgate.release' version '2.6.0'
 }
 
 group = 'org.jenkins-ci.plugins'
@@ -117,4 +118,14 @@ repositories {
      maven { url "http://repo.maven.apache.org/maven2" }
      maven { url "http://repo.spring.io/plugins-release/" }
      mavenCentral()
+}
+
+release {
+  	failOnUnversionedFiles = false
+  	failOnCommitNeeded = false
+	failOnPublishNeeded = false
+	failOnSnapshotDependencies = false
+	failOnUnversionedFiles = false
+	failOnUpdateNeeded = false
+	revertOnFail = false
 }
