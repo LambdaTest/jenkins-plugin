@@ -1,16 +1,16 @@
 //package com.lambdatest.jenkins;
 //
+//import com.lambdatest.jenkins.freestyle.api.Constant;
+//
 //import hudson.Extension;
 //import hudson.model.RootAction;
-//import jenkins.model.Jenkins;
 //
 //@Extension
 //public class MagicPlugWebsiteAction implements RootAction {
 //
 //	@Override
 //	public String getIconFileName() {
-//		System.out.println(Jenkins.RESOURCE_PATH + "/plugins/images/logo.png");
-//		return "/plugins/images/logo.png";
+//		return Constant.LT_ICON_FILE_NAME;
 //	}
 //
 //	@Override

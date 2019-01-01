@@ -1,5 +1,7 @@
 package com.lambdatest.jenkins.freestyle;
 
+import com.lambdatest.jenkins.freestyle.api.Constant;
+
 public class LambdaFreeStyleBuildAction extends AbstractFreeStyleBuildAction {
 	/*
 	 * Holds info about the Selenium Test
@@ -21,7 +23,7 @@ public class LambdaFreeStyleBuildAction extends AbstractFreeStyleBuildAction {
 		this.browserName = browserName;
 		this.browserVersion = browserVersion;
 		this.resolution = resolution;
-		setIconFileName("document.png");
+		setIconFileName(Constant.LT_ICON_FILE_NAME);
 		setDisplayName("LT(" + operatingSystem + " " + browserName + "-" + browserVersion + " " + resolution + ")");
 		setTestUrl(displayName);
 	}

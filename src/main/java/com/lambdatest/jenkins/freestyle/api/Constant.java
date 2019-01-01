@@ -1,5 +1,7 @@
 package com.lambdatest.jenkins.freestyle.api;
 
+import jenkins.model.Jenkins;
+
 public interface Constant {
 
 	String NOT_AVAILABLE = "NA";
@@ -56,8 +58,10 @@ public interface Constant {
 
 	String WIN_HASH_URL = "https://d190rtvbt0l12i.cloudfront.net/windows/latest";
 	String WIN_BINARY_URL = "https://d190rtvbt0l12i.cloudfront.net/windows/LTC.exe";
-	
+
 	String DEFAULT_TUNNEL_NAME = "jenkins-tunnel";
 	String LT_TUNNEL_NAME = "LT_TUNNEL_NAME";
+
+	String LT_ICON_FILE_NAME = Jenkins.RESOURCE_PATH + "/plugin/lambdatest-automation/images/logo.png";
 
 }
