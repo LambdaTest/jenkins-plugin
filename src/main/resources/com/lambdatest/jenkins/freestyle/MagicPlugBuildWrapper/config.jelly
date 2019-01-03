@@ -22,8 +22,8 @@
 		<f:entry name="choice" title="Choose Environment" field="choice">
     		<select name="choice">
     			<option value="beta">beta</option>
-        		<option value="stage">stage</option>
-        		<option value="dev">dev</option>
+        		<!--<option value="stage">stage</option>
+        		<option value="dev">dev</option> -->
    			</select>
 		</f:entry>
 		<f:entry title="Selenium Tests">

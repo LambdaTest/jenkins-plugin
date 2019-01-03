@@ -22,8 +22,8 @@ public interface Constant {
 	String BROWSER_VERSION = "browserVersion";
 	String RESOLUTION = "resolution";
 
-	String OS_API_URL = "https://dev-api.lambdatest.com/api/v1/capability?format=array";
-	String BROWSER_API_URL = "https://dev-api.lambdatest.com/api/v1/capability?format=array&os=";
+	String OS_API_URL = "https://stage-api.lambdatest.com/api/v1/capability?format=array";
+	String BROWSER_API_URL = "https://stage-api.lambdatest.com/api/v1/capability?format=array&os=";
 	String AUTH_API_URL = "https://beta-accounts.lambdatest.com/api/user/token/auth";
 
 	interface Stage {
