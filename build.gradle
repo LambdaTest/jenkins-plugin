@@ -14,7 +14,7 @@ plugins {
 }
 
 group = 'org.jenkins-ci.plugins'
-version = '1.4'
+version = '1.5'
 description = 'LambdaTest Plugin is used to run automated selenium tests on LambdaTest Cloud'
 
 sourceCompatibility = 1.8
@@ -48,6 +48,8 @@ jenkinsPlugin {
     // URL used to deploy the plugin, defaults to the value shown
     // the system property 'jpi.repoUrl' can be used to override this option
     repoUrl = 'https://repo.jenkins-ci.org/releases'
+    
+    gitHubUrl = 'https://github.com/jenkinsci/lambdatest-automation-plugin'
 
     // URL used to deploy snapshots of the plugin, defaults to the value shown
     // the system property 'jpi.snapshotRepoUrl' can be used to override this option
@@ -121,5 +123,15 @@ repositories {
 }
 
 release {
-  	
+    failOnSnapshotDependencies = false
+    failOnUnversionedFiles = false
+   	buildTasks = ['build']
+    scmAdapters = [net.researchgate.release.GitAdapter]
+
+    git {
+        requireBranch = 'master'
+        pushToRemote = 'origin'
+        commitVersionFileOnly = false
+        signTag = false
+    }
 }
