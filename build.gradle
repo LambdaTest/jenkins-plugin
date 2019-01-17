@@ -6,6 +6,21 @@
  * user guide available at https://docs.gradle.org/4.7/userguide/java_library_plugin.html
  */
 
+buildscript {
+    repositories {
+        maven {
+            name "jenkins"
+            delegate.url("http://repo.jenkins-ci.org/releases/")
+        }
+        // The plugin is currently only available via the Jenkins
+        // Maven repository, but has dependencies in Maven Central.
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.jenkins-ci.tools:gradle-jpi-plugin:0.28.1'
+    }
+}
+
 plugins {
     // Apply the java-library plugin to add support for Java Library
     id 'java-library'
@@ -14,7 +29,7 @@ plugins {
 }
 
 group = 'org.jenkins-ci.plugins'
-version = '1.5'
+version = '1.6'
 description = 'LambdaTest Plugin is used to run automated selenium tests on LambdaTest Cloud'
 
 sourceCompatibility = 1.8
@@ -43,7 +58,7 @@ jenkinsPlugin {
     compatibleSinceVersion = '1.1.0'
     
     // set the directory from which the development server will run, defaults to 'work'
-   	//workDir = file('/tmp/jenkins')
+   	workDir = file('/tmp/jenkins')
     
     // URL used to deploy the plugin, defaults to the value shown
     // the system property 'jpi.repoUrl' can be used to override this option
@@ -93,7 +108,7 @@ dependencies {
     implementation 'com.google.guava:guava:23.0'
 	
 	jenkinsPlugins 'org.jenkins-ci.plugins:matrix-project:1.4'
-    //jenkinsPlugins 'org.jenkinsci.plugins:git:1.1.15'
+    jenkinsPlugins 'org.jenkinsci.plugins:git:1.1.15'
     jenkinsPlugins 'org.jenkins-ci.plugins:credentials:2.1.16'
 	optionalJenkinsPlugins 'org.jenkins-ci.plugins:ant:1.5'
 	jenkinsTest 'org.jenkins-ci.main:maven-plugin:2.17'
