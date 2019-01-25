@@ -19,13 +19,13 @@
   
 	<f:block>
 		<f:validateButton title="Ping LambdaTest" progress="${%Checking availability of API...}" method="ping" />
-		<f:entry name="choice" title="Choose Environment" field="choice">
+		<!--<f:entry name="choice" title="Choose Environment" field="choice">
     		<select name="choice">
     			<option value="beta">beta</option>
-        		<!--<option value="stage">stage</option>
-        		<option value="dev">dev</option> -->
+        		<option value="stage">stage</option>
+        		<option value="dev">dev</option> 
    			</select>
-		</f:entry>
+		</f:entry> -->
 		<f:entry title="Selenium Tests">
 			<f:repeatable var="seleniumCapabilityRequest" items="${instance.seleniumCapabilityRequest}"  add="Add Selenium Test Capability">
 				<table width="100%">

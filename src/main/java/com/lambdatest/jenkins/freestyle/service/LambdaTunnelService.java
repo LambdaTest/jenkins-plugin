@@ -153,7 +153,7 @@ public class LambdaTunnelService {
 			throws IOException {
 		Runtime.getRuntime().exec("chmod 777 " + filePath);
 		ProcessBuilder processBuilder = new ProcessBuilder(filePath, "-user", user, "-key", key, "-logFile",
-				tunnelLogPath,"-tunnelName",tunnelName,"-env","stage","-v");
+				tunnelLogPath,"-tunnelName",tunnelName,"-v");
 		Process tunnelProcess = processBuilder.start();
 		Thread commandLineThread = new Thread(() -> {
 			try {

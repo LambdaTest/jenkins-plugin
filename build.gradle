@@ -109,9 +109,9 @@ dependencies {
 	
 	jenkinsPlugins 'org.jenkins-ci.plugins:matrix-project:1.4'
     jenkinsPlugins 'org.jenkinsci.plugins:git:1.1.15'
-    jenkinsPlugins 'org.jenkins-ci.plugins:credentials:2.1.16'
+    jenkinsPlugins 'org.jenkins-ci.plugins:credentials:2.1.10'
 	optionalJenkinsPlugins 'org.jenkins-ci.plugins:ant:1.5'
-	jenkinsTest 'org.jenkins-ci.main:maven-plugin:2.17'
+	//jenkinsTest 'org.jenkins-ci.main:maven-plugin:2.17'
 	jenkinsServer 'org.jenkins-ci.plugins:ant:1.5'
 	compile group: 'org.jenkins-ci.plugins', name: 'structs', version:'1.7'
 	compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.7'

@@ -52,7 +52,7 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 			@CheckForNull String credentialsId, String choice, boolean useLocalTunnel, LocalTunnel localTunnel,
 			ItemGroup context) throws Exception {
 		try {
-			choice = "beta";
+			choice = "prod";
 			System.out.println(credentialsId);
 			System.out.println(localTunnel);
 			System.out.println(useLocalTunnel);
@@ -179,7 +179,7 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 			String buildnumber = String.valueOf(build.getNumber());
 			if (!CollectionUtils.isEmpty(seleniumCapabilityRequest) && seleniumCapabilityRequest.size() == 1) {
 				JSONObject seleniumCapability = seleniumCapabilityRequest.get(0);
-				env.put(Constant.LT_OPERATING_SYSTEM, seleniumCapability.getString(Constant.OPERATING_SYSTEM));
+				env.put(Constant.LT_PLATFORM, seleniumCapability.getString(Constant.OPERATING_SYSTEM));
 				env.put(Constant.LT_BROWSER_NAME, seleniumCapability.getString(Constant.BROWSER_NAME));
 				env.put(Constant.LT_BROWSER_VERSION, seleniumCapability.getString(Constant.BROWSER_VERSION));
 				env.put(Constant.LT_RESOLUTION, seleniumCapability.getString(Constant.RESOLUTION));
@@ -191,7 +191,8 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 			if (localTunnel != null) {
 				env.put(Constant.LT_TUNNEL_NAME, getTunnelIdentifierExtended(localTunnel.getTunnelName(),buildname,buildnumber));
 			}
-			env.put(Constant.USERNAME, username);
+			env.put(Constant.LT_USERNAME, username);
+			env.put(Constant.LT_ACCESS_KEY, accessToken.getPlainText());
 			System.out.println(env);
 			super.buildEnvVars(env);
 		}

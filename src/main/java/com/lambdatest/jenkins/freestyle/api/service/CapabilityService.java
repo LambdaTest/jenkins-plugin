@@ -194,6 +194,8 @@ public class CapabilityService {
 				sb.append(Constant.Dev.APP_URL);
 			} else if (Constant.BETA.equals(type)) {
 				sb.append(Constant.Beta.APP_URL);
+			}else {
+				sb.append(Constant.APP_URL);
 			}
 			sb.append("/jenkins/?buildID=[\"").append(buildNumber).append("\"]&token=").append(accessToken)
 					.append("&username=").append(username).append("&auth=jenkins");
@@ -213,6 +215,8 @@ public class CapabilityService {
 				sb.append(Constant.Dev.HUB_URL);
 			} else if (Constant.BETA.equals(type)) {
 				sb.append(Constant.Beta.HUB_URL);
+			}else {
+				sb.append(Constant.HUB_URL);
 			}
 			return sb.toString();
 		} catch (Exception e) {

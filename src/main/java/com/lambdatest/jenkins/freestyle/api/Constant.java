@@ -6,7 +6,7 @@ public interface Constant {
 
 	String NOT_AVAILABLE = "NA";
 	String EMPTY = "";
-	String LT_OPERATING_SYSTEM = "LT_OPERATING_SYSTEM";
+	String LT_PLATFORM = "LT_PLATFORM";
 	String LT_BROWSERS = "LT_BROWSERS";
 	String LT_BROWSER_NAME = "LT_BROWSER_NAME";
 	String LT_BROWSER_VERSION = "LT_BROWSER_VERSION";
@@ -14,18 +14,20 @@ public interface Constant {
 	String LT_GRID_URL = "LT_GRID_URL";
 	String LT_BUILD_NAME = "LT_BUILD_NAME";
 	String LT_BUILD_NUMBER = "LT_BUILD_NUMBER";
-	String USERNAME = "USERNAME";
-	String ACCESS_TOKEN = "ACCESS_TOKEN";
+	String LT_USERNAME = "LT_USERNAME";
+	String LT_ACCESS_KEY = "LT_ACCESS_KEY";
 
 	String OPERATING_SYSTEM = "operatingSystem";
 	String BROWSER_NAME = "browserName";
 	String BROWSER_VERSION = "browserVersion";
 	String RESOLUTION = "resolution";
 
-	String OS_API_URL = "https://stage-api.lambdatest.com/api/v1/capability?format=array";
-	String BROWSER_API_URL = "https://stage-api.lambdatest.com/api/v1/capability?format=array&os=";
-	String AUTH_API_URL = "https://beta-accounts.lambdatest.com/api/user/token/auth";
-
+	String OS_API_URL = "https://api.lambdatest.com/api/v1/capability?format=array";
+	String BROWSER_API_URL = "https://api.lambdatest.com/api/v1/capability?format=array&os=";
+	String AUTH_API_URL = "https://accounts.lambdatest.com/api/user/token/auth";
+	String APP_URL = "https://automation.lambdatest.com";
+	String HUB_URL = "@hub.lambdatest.com/wd/hub";
+	
 	interface Stage {
 		String APP_URL = "https://stage-automation.lambdatest.com";
 		String HUB_URL = "@stage-hub.lambdatest.com/wd/hub";
@@ -50,14 +52,14 @@ public interface Constant {
 	String DEV = "dev";
 	String BETA = "beta";
 
-	String MAC_HASH_URL = "https://d190rtvbt0l12i.cloudfront.net/mac/latest";
-	String MAC_BINARY_URL = "https://d190rtvbt0l12i.cloudfront.net/mac/LTC-mac.sh";
+	String MAC_HASH_URL = "https://s3.amazonaws.com/lambda-downloads/mac/latest";
+	String MAC_BINARY_URL = "https://s3.amazonaws.com/lambda-downloads/mac/LT";
 
-	String LINUX_HASH_URL = "https://d190rtvbt0l12i.cloudfront.net/linux/latest";
-	String LINUX_BINARY_URL = "https://d190rtvbt0l12i.cloudfront.net/linux/LTC.sh";
+	String LINUX_HASH_URL = "https://s3.amazonaws.com/lambda-downloads/linux/latest";
+	String LINUX_BINARY_URL = "https://s3.amazonaws.com/lambda-downloads/linux/LT";
 
-	String WIN_HASH_URL = "https://d190rtvbt0l12i.cloudfront.net/windows/latest";
-	String WIN_BINARY_URL = "https://d190rtvbt0l12i.cloudfront.net/windows/LTC.exe";
+	String WIN_HASH_URL = "https://s3.amazonaws.com/lambda-downloads/windows/latest";
+	String WIN_BINARY_URL = "https://s3.amazonaws.com/lambda-downloads/windows/LT.exe";
 
 	String DEFAULT_TUNNEL_NAME = "jenkins-tunnel";
 	String LT_TUNNEL_NAME = "LT_TUNNEL_NAME";
