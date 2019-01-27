@@ -7,4 +7,5 @@
  * in the user guide at https://docs.gradle.org/4.7/userguide/multi_project_builds.html
  */
 
-rootProject.name = 'lambdatest-automation-plugin'
+rootProject.name = 'lambdatest-automation'
+enableFeaturePreview('STABLE_PUBLISHING')

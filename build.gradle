@@ -9,27 +9,31 @@
 buildscript {
     repositories {
         maven {
-            name "jenkins"
-            delegate.url("http://repo.jenkins-ci.org/releases/")
+            url 'https://repo.jenkins-ci.org/remote-repos'
+            credentials {
+                username = "${artifactory_user}"
+                password = "${artifactory_password}"
+            }
         }
-        // The plugin is currently only available via the Jenkins
-        // Maven repository, but has dependencies in Maven Central.
-        mavenCentral()
+        
     }
     dependencies {
-        classpath 'org.jenkins-ci.tools:gradle-jpi-plugin:0.28.1'
+        //Check for the latest version here: http://plugins.gradle.org/plugin/com.jfrog.artifactory
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4+"
     }
 }
 
 plugins {
     // Apply the java-library plugin to add support for Java Library
     id 'java-library'
+    id 'maven-publish'
+    id 'signing'
     id 'org.jenkins-ci.jpi' version '0.27.0'
     id 'net.researchgate.release' version '2.6.0'
 }
 
 group = 'org.jenkins-ci.plugins'
-version = '1.6'
+version = '1.7'
 description = 'LambdaTest Plugin is used to run automated selenium tests on LambdaTest Cloud'
 
 sourceCompatibility = 1.8
@@ -135,6 +139,84 @@ repositories {
      maven { url "http://repo.maven.apache.org/maven2" }
      maven { url "http://repo.spring.io/plugins-release/" }
      mavenCentral()
+}
+
+allprojects {
+    apply plugin: "com.jfrog.artifactory"
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = 'lambdatest-automation'
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+            pom {
+                name = 'LambdaTest Automation Plugin'
+                description = 'LambdaTest Plugin is used to run automated selenium tests on LambdaTest Cloud'
+                url = 'https://github.com/jenkinsci/lambdatest-automation-plugin'
+				licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'lambdatest'
+                        name = 'lambdatest'
+                        email = 'sushobhitd@lambdatest.com'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://github.com/jenkinsci/lambdatest-automation-plugin'
+                    developerConnection = 'scm:git:ssh://github.com/jenkinsci/lambdatest-automation-plugin.git'
+                    url = 'https://github.com/jenkinsci/lambdatest-automation-plugin'
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            // change URLs to point to your repos, e.g. http://my.org/repo
+            url "https://repo.jenkins-ci.org/releases"
+            credentials {
+                username "${artifactory_user}"
+                password "${artifactory_password}"
+            }
+            //def releasesRepoUrl = "$buildDir/repos/releases"
+            //def snapshotsRepoUrl = "$buildDir/repos/snapshots"
+            //url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+        }
+    }
+}
+
+artifactory {
+    contextUrl = "${artifactory_contextUrl}"   //The base Artifactory URL if not overridden by the publisher/resolver
+    publish {
+        repository {
+            repoKey = 'releases'
+            username = "${artifactory_user}"
+            password = "${artifactory_password}"
+            maven = true
+            
+        }
+    }
+    resolve {
+        repository {
+            repoKey = 'remote-repos'
+            username = "${artifactory_user}"
+            password = "${artifactory_password}"
+            maven = true
+            
+        }
+    }
+}
+
+signing {
+    sign configurations.archives
+    sign publishing.publications.mavenJava
 }
 
 release {
