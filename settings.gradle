@@ -8,4 +8,3 @@
  */
 
 rootProject.name = 'lambdatest-automation'
-enableFeaturePreview('STABLE_PUBLISHING')
