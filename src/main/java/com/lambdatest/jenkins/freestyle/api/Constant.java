@@ -52,14 +52,14 @@ public interface Constant {
 	String DEV = "dev";
 	String BETA = "beta";
 
-	String MAC_HASH_URL = "https://s3.amazonaws.com/lambda-downloads/mac/latest";
-	String MAC_BINARY_URL = "https://s3.amazonaws.com/lambda-downloads/mac/LT";
+	String MAC_HASH_URL = "https://downloads.lambdatest.com/tunnel/mac/latest";
+	String MAC_BINARY_URL = "https://downloads.lambdatest.com/tunnel/mac/LT_Mac.zip";
 
-	String LINUX_HASH_URL = "https://s3.amazonaws.com/lambda-downloads/linux/latest";
-	String LINUX_BINARY_URL = "https://s3.amazonaws.com/lambda-downloads/linux/LT";
+	String LINUX_HASH_URL = "https://downloads.lambdatest.com/tunnel/linux/latest";
+	String LINUX_BINARY_URL = "https://downloads.lambdatest.com/tunnel/linux/LT_Linux.zip";
 
-	String WIN_HASH_URL = "https://s3.amazonaws.com/lambda-downloads/windows/latest";
-	String WIN_BINARY_URL = "https://s3.amazonaws.com/lambda-downloads/windows/LT.exe";
+	String WIN_HASH_URL = "https://downloads.lambdatest.com/tunnel/windows/latest";
+	String WIN_BINARY_URL = "https://downloads.lambdatest.com/tunnel/windows/LT_Windows.zip";
 
 	String DEFAULT_TUNNEL_NAME = "jenkins-tunnel";
 	String LT_TUNNEL_NAME = "LT_TUNNEL_NAME";

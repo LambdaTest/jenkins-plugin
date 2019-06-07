@@ -29,7 +29,7 @@ plugins {
 }
 
 group = 'org.jenkins-ci.plugins'
-version = '1.10'
+version = '1.11'
 description = 'LambdaTest Plugin is used to run automated selenium tests on LambdaTest Cloud'
 
 sourceCompatibility = 1.8
@@ -108,7 +108,7 @@ dependencies {
     implementation 'com.google.guava:guava:23.0'
 	
 	jenkinsPlugins 'org.jenkins-ci.plugins:matrix-project:1.4'
-    jenkinsPlugins 'org.jenkinsci.plugins:git:1.1.15'
+    jenkinsPlugins 'org.jenkinsci.plugins:git:1.1.25'
     jenkinsPlugins 'org.jenkins-ci.plugins:credentials:2.1.10'
 	optionalJenkinsPlugins 'org.jenkins-ci.plugins:ant:1.5'
 	//jenkinsTest 'org.jenkins-ci.main:maven-plugin:2.17'
