@@ -63,10 +63,11 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 				System.out.println(seleniumCapabilityRequest);
 				validateTestInput(seleniumCapabilityRequest);
 				this.seleniumCapabilityRequest = seleniumCapabilityRequest;
-				this.choice = choice;
-				setCredentials(credentialsId, context);
-				setCredentialsId(credentialsId);
 			}
+			//Setting up credentials in both case if input capabilities are there or not
+			this.choice = choice;
+			setCredentials(credentialsId, context);
+			setCredentialsId(credentialsId);
 			if (localTunnel != null) {
 				this.localTunnel = localTunnel;
 				this.useLocalTunnel = true;
