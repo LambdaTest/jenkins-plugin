@@ -27,6 +27,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lambdatest.jenkins.freestyle.api.Constant;
+import com.lambdatest.jenkins.freestyle.api.auth.UserAuthRequest;
 import com.lambdatest.jenkins.freestyle.api.auth.UserAuthResponse;
 import com.lambdatest.jenkins.freestyle.api.browser.Browser;
 import com.lambdatest.jenkins.freestyle.api.browser.BrowserVersion;
@@ -74,7 +75,7 @@ public class CapabilityService {
 	public static Set<String> getBrowserNames(String operatingSystem) {
 		try {
 			if (allBrowserNames.containsKey(operatingSystem)) {
-				System.out.println("Supported Browser List Exists for " + operatingSystem);
+				logger.info("Supported Browser List Exists for " + operatingSystem);
 				return allBrowserNames.get(operatingSystem);
 			}
 			supportedBrowsers = new LinkedHashSet<String>();
@@ -107,17 +108,13 @@ public class CapabilityService {
 
 	public static Set<String> getBrowserVersions(String operatingSystem, String browserName) {
 		supportedBrowserVersions = new LinkedHashSet<String>();
-		System.out.println("\n*** START ***");
-		// System.out.println(allBrowserVersions.keySet().toString());
-		System.out.println("\n*** END ***");
 		VersionKey vk = new VersionKey(operatingSystem, browserName);
 		if (allBrowserVersions.containsKey(vk)) {
 			allBrowserVersions.get(vk).forEach(bv -> {
 				supportedBrowserVersions.add(bv.getVersion());
 			});
 		} else {
-			System.out.println(vk + " not found");
-			System.out.println("\n*** NOT FOUND ***");
+			//System.out.println(vk + " not found");
 		}
 		return supportedBrowserVersions;
 	}
@@ -134,29 +131,11 @@ public class CapabilityService {
 
 	}
 
-	public static boolean isValidUser(String username, String authKey) {
+	public static boolean isValidUser(String username, String token) {
 		boolean validUser = false;
 		try {
-			HttpClient client = HttpClientBuilder.create().build();
-			HttpPost httpPost = new HttpPost(Constant.AUTH_API_URL);
-
-			// add header
-			httpPost.addHeader("Accept", "application/json");
-			httpPost.addHeader("Content-Type", "application/json");
-			String json = "{\"username\":\"" + username + "\",\"token\":\"" + authKey + "\"}";
-			StringEntity entity = new StringEntity(json);
-			httpPost.setEntity(entity);
-
-			HttpResponse response = client.execute(httpPost);
-			BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-
-			StringBuffer result = new StringBuffer();
-			String line = "";
-			while ((line = rd.readLine()) != null) {
-				result.append(line);
-			}
-			String jsonResponse = result.toString();
-			System.out.println(jsonResponse);
+			UserAuthRequest request = new UserAuthRequest(username, token);
+			String jsonResponse = sendPostRequest(Constant.AUTH_API_URL, request);
 			ObjectMapper objectMapper = new ObjectMapper();
 			objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 			// convert json string to object
@@ -164,11 +143,28 @@ public class CapabilityService {
 			if (userAuthResponse != null && userAuthResponse.getUsername() != null) {
 				validUser = true;
 			}
-
 		} catch (Exception e) {
 			logger.warning(e.getMessage());
 		}
 		return validUser;
+	}
+
+	public static UserAuthResponse getUserInfo(String username, String token) {
+		UserAuthResponse userAuthResponse = null;
+		try {
+			UserAuthRequest request = new UserAuthRequest(username, token);
+			String jsonResponse = sendPostRequest(Constant.AUTH_API_URL, request);
+			ObjectMapper objectMapper = new ObjectMapper();
+			objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+			// convert json string to object
+			userAuthResponse = objectMapper.readValue(jsonResponse, UserAuthResponse.class);
+			if (userAuthResponse != null && userAuthResponse.getUsername() != null) {
+				return userAuthResponse;
+			}
+		} catch (Exception e) {
+			logger.warning(e.getMessage());
+		}
+		return userAuthResponse;
 	}
 
 	public boolean ping() {
@@ -194,7 +190,7 @@ public class CapabilityService {
 				sb.append(Constant.Dev.APP_URL);
 			} else if (Constant.BETA.equals(type)) {
 				sb.append(Constant.Beta.APP_URL);
-			}else {
+			} else {
 				sb.append(Constant.APP_URL);
 			}
 			sb.append("/jenkins/?buildID=[\"").append(buildNumber).append("\"]&token=").append(accessToken)
@@ -215,7 +211,7 @@ public class CapabilityService {
 				sb.append(Constant.Dev.HUB_URL);
 			} else if (Constant.BETA.equals(type)) {
 				sb.append(Constant.Beta.HUB_URL);
-			}else {
+			} else {
 				sb.append(Constant.HUB_URL);
 			}
 			return sb.toString();
@@ -240,6 +236,38 @@ public class CapabilityService {
 			result.append(line);
 		}
 		return result.toString();
+	}
+
+	public static String sendPostRequest(String url, Object request) throws ClientProtocolException, IOException {
+		HttpClient client = HttpClientBuilder.create().build();
+		HttpPost httpPost = new HttpPost(url);
+
+		// add header
+		httpPost.addHeader("Accept", "application/json");
+		httpPost.addHeader("Content-Type", "application/json");
+		// Creating Object of ObjectMapper define in Jakson Api
+		String jsonStr = null;
+		try {
+			ObjectMapper Obj = new ObjectMapper();
+			jsonStr = Obj.writeValueAsString(request);
+			logger.info(jsonStr);
+			StringEntity entity = new StringEntity(jsonStr);
+			httpPost.setEntity(entity);
+
+			HttpResponse response = client.execute(httpPost);
+			BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+
+			StringBuffer result = new StringBuffer();
+			String line = "";
+			while ((line = rd.readLine()) != null) {
+				result.append(line);
+			}
+			String jsonResponse = result.toString();
+			return jsonResponse;
+		} catch (IOException e) {
+			logger.warning(e.getMessage());
+			return "";
+		}
 	}
 
 	public static void main(String[] args) throws Exception {

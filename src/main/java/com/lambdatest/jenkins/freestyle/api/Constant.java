@@ -25,6 +25,7 @@ public interface Constant {
 	String OS_API_URL = "https://api.lambdatest.com/api/v1/capability?format=array";
 	String BROWSER_API_URL = "https://api.lambdatest.com/api/v1/capability?format=array&os=";
 	String AUTH_API_URL = "https://accounts.lambdatest.com/api/user/token/auth";
+	String ANALYTICS_URL = "https://backend.lambdatest.com/api/analytics/automation-plugin-usage";
 	String APP_URL = "https://automation.lambdatest.com";
 	String HUB_URL = "@hub.lambdatest.com/wd/hub";
 	

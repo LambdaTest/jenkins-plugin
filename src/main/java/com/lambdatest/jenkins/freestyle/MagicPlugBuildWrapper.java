@@ -17,9 +17,12 @@ import org.springframework.util.CollectionUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lambdatest.jenkins.analytics.AnalyticService;
+import com.lambdatest.jenkins.analytics.data.AnalyticRequest;
 import com.lambdatest.jenkins.credential.MagicPlugCredentials;
 import com.lambdatest.jenkins.credential.MagicPlugCredentialsImpl;
 import com.lambdatest.jenkins.freestyle.api.Constant;
+import com.lambdatest.jenkins.freestyle.api.auth.UserAuthResponse;
 import com.lambdatest.jenkins.freestyle.api.service.CapabilityService;
 import com.lambdatest.jenkins.freestyle.data.LocalTunnel;
 import com.lambdatest.jenkins.freestyle.service.LambdaTunnelService;
@@ -45,6 +48,7 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 	private boolean useLocalTunnel;
 	private String tunnelName;
 	private Process tunnelProcess;
+	private UserAuthResponse userAuthResponse;
 	private final static Logger logger = Logger.getLogger(MagicPlugBuildWrapper.class.getName());
 
 	@DataBoundConstructor
@@ -53,22 +57,19 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 			ItemGroup context) throws Exception {
 		try {
 			choice = "prod";
-			System.out.println(credentialsId);
-			System.out.println(localTunnel);
-			System.out.println(useLocalTunnel);
 			if (seleniumCapabilityRequest == null) {
 				// prevent null pointer
 				this.seleniumCapabilityRequest = new ArrayList<JSONObject>();
 			} else {
-				System.out.println(seleniumCapabilityRequest);
 				validateTestInput(seleniumCapabilityRequest);
 				this.seleniumCapabilityRequest = seleniumCapabilityRequest;
 			}
-			//Setting up credentials in both case if input capabilities are there or not
+			// Setting up credentials in both case if input capabilities are there or not
 			this.choice = choice;
-			setCredentials(credentialsId, context);
+			setLambdaTestCredentials(credentialsId, context);
 			setCredentialsId(credentialsId);
 			if (localTunnel != null) {
+				logger.info(localTunnel.toString());
 				this.localTunnel = localTunnel;
 				this.useLocalTunnel = true;
 				this.tunnelName = localTunnel.getTunnelName();
@@ -79,19 +80,19 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 	}
 
 	private void configureTunnel(LocalTunnel localTunnel, String buildname, String buildnumber) {
-		System.out.println("Tunnel Config:" + localTunnel);
 		if (StringUtils.isBlank(localTunnel.getTunnelName())) {
 			localTunnel.setTunnelName(Constant.DEFAULT_TUNNEL_NAME);
 			this.localTunnel.setTunnelName(Constant.DEFAULT_TUNNEL_NAME);
 		}
-		String tunnelNameExt = getTunnelIdentifierExtended(localTunnel.getTunnelName(),buildname,buildnumber);
-		this.tunnelProcess = LambdaTunnelService.setUp(this.username, this.accessToken.getPlainText(),
-				tunnelNameExt);
+		String tunnelNameExt = getTunnelIdentifierExtended(localTunnel.getTunnelName(), buildname, buildnumber);
+		this.tunnelProcess = LambdaTunnelService.setUp(this.username, this.accessToken.getPlainText(), tunnelNameExt);
 	}
 
 	private String getTunnelIdentifierExtended(String tunnelName, String buildname, String buildnumber) {
-		StringBuilder sb = new StringBuilder(tunnelName.trim()).append("-").append(buildname.trim()).append("-")
-				.append(buildnumber);
+		StringBuilder sb = new StringBuilder(tunnelName.trim());
+		// StringBuilder sb = new
+		// StringBuilder(tunnelName.trim()).append("-").append(buildname.trim()).append("-")
+		// .append(buildnumber);
 		return sb.toString();
 	}
 
@@ -99,16 +100,16 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 		// TODO : Validation For Input Data
 	}
 
-	private void setCredentials(String credentialsId, ItemGroup context) throws Exception {
+	private void setLambdaTestCredentials(String credentialsId, ItemGroup context) throws Exception {
 		final MagicPlugCredentials magicPlugCredential = MagicPlugCredentialsImpl.getCredentials(credentialsId,
 				context);
 		if (magicPlugCredential != null) {
 			this.username = magicPlugCredential.getUserName();
 			this.accessToken = magicPlugCredential.getAccessToken();
-			System.out.println(username + ":" + accessToken.getPlainText());
 			// Verify Auth Token Once again
-			if (CapabilityService.isValidUser(this.username, this.accessToken.getPlainText())) {
-				System.out.println("Valid User");
+			this.userAuthResponse = CapabilityService.getUserInfo(this.username, this.accessToken.getPlainText());
+			if (this.userAuthResponse != null && !StringUtils.isEmpty(this.userAuthResponse.getUsername())) {
+				logger.info("Valid User");
 			} else {
 				throw new Exception("Invalid Credentials ...");
 			}
@@ -120,13 +121,9 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 	@Override
 	public Environment setUp(AbstractBuild build, Launcher launcher, BuildListener listener)
 			throws IOException, InterruptedException {
-		System.out.println("Environment setUp() -start");
-
 		String buildname = build.getFullDisplayName().substring(0,
 				build.getFullDisplayName().length() - (String.valueOf(build.getNumber()).length() + 1));
 		String buildnumber = String.valueOf(build.getNumber());
-		System.out.println("buildname :" + buildname);
-		System.out.println("buildnumber :" + buildnumber);
 		// Configure Tunnel
 		if (this.localTunnel != null) {
 			configureTunnel(this.localTunnel, buildname, buildnumber);
@@ -135,12 +132,10 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 			createFreeStyleBuildActions(build, buildname, buildnumber, seleniumCapabilityRequest, this.username,
 					this.accessToken.getPlainText(), this.choice);
 		}
-		System.out.println("Adding LT actions done");
 
 		// Create Grid URL
 		this.gridURL = CapabilityService.buildHubURL(this.username, this.accessToken.getPlainText(), this.choice);
-		System.out.println(this.gridURL);
-		System.out.println("Environment setUp() -end");
+		logger.info(this.gridURL);
 		return new MagicPlugEnvironment(build);
 	}
 
@@ -189,12 +184,27 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 			env.put(Constant.LT_GRID_URL, gridURL);
 			env.put(Constant.LT_BUILD_NAME, buildname);
 			env.put(Constant.LT_BUILD_NUMBER, buildnumber);
+			AnalyticRequest analyticRequest = null;
+			if (userAuthResponse != null) {
+				analyticRequest = new AnalyticRequest(userAuthResponse.getId(), gridURL, buildname, build.getNumber());
+			} else {
+				analyticRequest = new AnalyticRequest();
+			}
 			if (localTunnel != null) {
-				env.put(Constant.LT_TUNNEL_NAME, getTunnelIdentifierExtended(localTunnel.getTunnelName(),buildname,buildnumber));
+				String tunnelName = getTunnelIdentifierExtended(localTunnel.getTunnelName(), buildname, buildnumber);
+				analyticRequest.setTunnelName(tunnelName);
+				env.put(Constant.LT_TUNNEL_NAME, tunnelName);
 			}
 			env.put(Constant.LT_USERNAME, username);
 			env.put(Constant.LT_ACCESS_KEY, accessToken.getPlainText());
-			System.out.println(env);
+			// For Plugin Analytics Service
+			try {
+				AnalyticService as = new AnalyticService();
+				as.setAnalyticRequest(analyticRequest);
+				new Thread(as).start();
+			} catch (Exception e) {
+				logger.warning(e.getMessage());
+			}
 			super.buildEnvVars(env);
 		}
 
