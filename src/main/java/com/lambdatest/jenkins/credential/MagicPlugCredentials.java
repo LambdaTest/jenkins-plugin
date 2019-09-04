@@ -6,7 +6,6 @@ import com.cloudbees.plugins.credentials.CredentialsNameProvider;
 import com.cloudbees.plugins.credentials.NameWith;
 import com.cloudbees.plugins.credentials.common.StandardCredentials;
 
-import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Util;
 import hudson.util.Secret;
 
@@ -24,7 +23,7 @@ public interface MagicPlugCredentials extends StandardCredentials {
 		 * {@inheritDoc}
 		 */
 		@Override
-		public String getName(@NonNull MagicPlugCredentials c) {
+		public String getName(MagicPlugCredentials c) {
 			StringBuilder name = new StringBuilder().append(c.getDisplayName());
 			String description = Util.fixEmptyAndTrim(c.getDescription());
 			if (StringUtils.isBlank(description)) {

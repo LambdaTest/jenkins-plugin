@@ -2,6 +2,7 @@ package com.lambdatest.jenkins.freestyle;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -134,7 +135,7 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 		}
 
 		// Create Grid URL
-		this.gridURL = CapabilityService.buildHubURL(this.username, this.accessToken.getPlainText(), this.choice);
+		this.gridURL = CapabilityService.buildHubURL(this.username, this.accessToken.getPlainText(),"production");
 		logger.info(this.gridURL);
 		return new MagicPlugEnvironment(build);
 	}
@@ -227,15 +228,46 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 			 */
 			try {
 				logger.info("tearDown");
-				if (tunnelProcess != null && tunnelProcess.isAlive()) {
-					logger.info("tunnel is active, going to stop tunnel binary");
-					tunnelProcess.destroyForcibly();
-					logger.info("Tunnel destroyed");
+				int x=1;
+				while(x!=-1) {
+					x=stopTunnel();
 				}
 			} catch (Exception e) {
 				logger.warning(e.getMessage());
 			}
 			return super.tearDown(build, listener);
+		}
+		
+		private int stopTunnel() throws IOException, InterruptedException {
+			if (tunnelProcess != null && tunnelProcess.isAlive()) {
+				logger.info("tunnel is active, going to stop tunnel binary");
+				long tunnelProcessId=getPidOfProcess(tunnelProcess);
+				stopTunnelProcessUsingPID(tunnelProcessId);
+				Thread.sleep(2000);
+				return 10;
+			}else {
+				logger.info("Tunnel Stopped");
+				return -1;
+			}
+		}
+		
+		private long getPidOfProcess(Process p) {
+		    long pid = -1;
+		    try {
+		      if (p.getClass().getName().equals("java.lang.UNIXProcess")) {
+		        Field f = p.getClass().getDeclaredField("pid");
+		        f.setAccessible(true);
+		        pid = f.getLong(p);
+		        f.setAccessible(false);
+		      }
+		    } catch (Exception e) {
+		      pid = -1;
+		    }
+		    return pid;
+		  }
+		
+		private void stopTunnelProcessUsingPID(long tunnelProcessId) throws IOException {
+			Runtime.getRuntime().exec("kill -SIGINT "+ tunnelProcessId);
 		}
 
 	}

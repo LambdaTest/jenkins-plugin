@@ -38,15 +38,15 @@ public class LambdaTunnelService {
 				if (loader != null) {
 					URL tunnelFolderPath = loader.getResource(tunnelFolderName);
 					if (tunnelFolderPath != null) {
-						String tunnelBinaryLocation = tunnelFolderPath.getPath() + latestHash + ".sh";
+						String tunnelBinaryLocation = tunnelFolderPath.getPath() + latestHash;
 						logger.info("Tunnel Binary Location :" + tunnelBinaryLocation);
 						File tunnelBinary = new File(tunnelBinaryLocation);
 						if (tunnelBinary.exists()) {
 							logger.info("Tunnel Binary already exists");
 						} else {
 							logger.info("Tunnel Binary not exists, downloading...");
-							//saveFileFromUrlWithJavaIO(tunnelBinaryLocation, Constant.LINUX_BINARY_URL);
-							downloadAndUnZipBinaryFile(tunnelFolderPath.getPath(),latestHash,Constant.LINUX_BINARY_URL);
+							downloadAndUnZipBinaryFile(tunnelFolderPath.getPath(), latestHash,
+									Constant.LINUX_BINARY_URL);
 							logger.info("Tunnel Binary downloaded from " + Constant.LINUX_BINARY_URL);
 						}
 						// Checking for the tunnel log file exists or not
@@ -62,7 +62,7 @@ public class LambdaTunnelService {
 							logger.info("Tunnel log File created");
 						}
 						Runtime.getRuntime().exec("chmod 777 " + tunnelLogPath);
-						return runCommandLine(tunnelBinaryLocation, tunnelLogPath, user, key,tunnelName);
+						return runCommandLine(tunnelBinaryLocation, tunnelLogPath, user, key, tunnelName);
 					} else {
 						logger.warning("tunnelFolderPath empty");
 					}
@@ -84,15 +84,15 @@ public class LambdaTunnelService {
 				if (loader != null) {
 					URL tunnelFolderPath = loader.getResource(tunnelFolderName);
 					if (tunnelFolderPath != null) {
-						String tunnelBinaryLocation = tunnelFolderPath.getPath() + latestHash + ".sh";
+						String tunnelBinaryLocation = tunnelFolderPath.getPath() + latestHash;
 						logger.info("Tunnel Binary Location :" + tunnelBinaryLocation);
 						File tunnelBinary = new File(tunnelBinaryLocation);
 						if (tunnelBinary.exists()) {
 							logger.info("Tunnel Binary already exists");
 						} else {
 							logger.info("Tunnel Binary not exists, downloading...");
-							//saveFileFromUrlWithJavaIO(tunnelBinaryLocation, Constant.MAC_BINARY_URL);
-							downloadAndUnZipBinaryFile(tunnelFolderPath.getPath(),latestHash,Constant.MAC_BINARY_URL);
+							// saveFileFromUrlWithJavaIO(tunnelBinaryLocation, Constant.MAC_BINARY_URL);
+							downloadAndUnZipBinaryFile(tunnelFolderPath.getPath(), latestHash, Constant.MAC_BINARY_URL);
 							logger.info("Tunnel Binary downloaded from " + Constant.MAC_BINARY_URL);
 						}
 						// Checking for the tunnel log file exists or not
@@ -107,7 +107,7 @@ public class LambdaTunnelService {
 							logger.info("Tunnel log File created");
 						}
 						Runtime.getRuntime().exec("chmod 777 " + tunnelLogPath);
-						return runCommandLine(tunnelBinaryLocation, tunnelLogPath, user, key,tunnelName);
+						return runCommandLine(tunnelBinaryLocation, tunnelLogPath, user, key, tunnelName);
 					} else {
 						logger.warning("tunnelFolderPath empty");
 					}
@@ -156,11 +156,11 @@ public class LambdaTunnelService {
 				fout.close();
 		}
 	}
-	
+
 	private static void downloadAndUnZipBinaryFile(String folderPath, String latestHash, String linuxBinaryUrl) {
-		String tunnelBinaryFileName = folderPath + latestHash + ".sh";
+		String tunnelBinaryFileName = folderPath + latestHash;
 		String tunnelBinaryZipFileName = folderPath + latestHash + ".zip";
-		downloadFile(linuxBinaryUrl,tunnelBinaryZipFileName);
+		downloadFile(linuxBinaryUrl, tunnelBinaryZipFileName);
 		unZipIt(tunnelBinaryZipFileName,tunnelBinaryFileName,folderPath);
 	}
 
@@ -174,39 +174,19 @@ public class LambdaTunnelService {
 		out.close();
 	}
 
-	private static void downloadFile(String linuxBinaryUrl, String tunnelBinaryZipFileName) {
+	private static void downloadFile(String linuxBinaryUrl, String tunnelBinaryFileName) {
 		try {
-			System.out.println(tunnelBinaryZipFileName);
-			long startTime = System.currentTimeMillis();
-
-			URL url = new URL(linuxBinaryUrl);
-
-			url.openConnection();
-			InputStream reader = url.openStream();
-
-			FileOutputStream writer = new FileOutputStream(tunnelBinaryZipFileName);
-			byte[] buffer = new byte[102400];
-			int totalBytesRead = 0;
-			int bytesRead = 0;
-
-			System.out.println("Reading ZIP file 20KB blocks at a time.\n");
-
-			while ((bytesRead = reader.read(buffer)) > 0) {
-				writer.write(buffer, 0, bytesRead);
-				buffer = new byte[102400];
-				totalBytesRead += bytesRead;
+			logger.info(tunnelBinaryFileName);
+			BufferedInputStream in = new BufferedInputStream(new URL(linuxBinaryUrl).openStream());
+			FileOutputStream fileOutputStream = new FileOutputStream(tunnelBinaryFileName);
+			byte dataBuffer[] = new byte[1024];
+			int bytesRead;
+			while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
+				fileOutputStream.write(dataBuffer, 0, bytesRead);
 			}
-
-			long endTime = System.currentTimeMillis();
-
-			System.out.println("Done. " + new Integer(totalBytesRead).toString() + " bytes read ("
-					+ new Long(endTime - startTime).toString() + " millseconds).\n");
-			writer.close();
-			reader.close();
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
+			logger.info("Binary Downloaded.\n");
+		} catch (Exception e) {
+			logger.info(e.getMessage());
 		}
 	}
 
@@ -219,38 +199,47 @@ public class LambdaTunnelService {
 			String OUTDIR = folderPath + File.separator;
 			while (zipEntries.hasMoreElements()) {
 				ZipEntry zipEntry = (ZipEntry) zipEntries.nextElement();
-				System.out.println("       Extracting file: " + tunnelBinaryFileName);
+				logger.info("       Extracting file: " + tunnelBinaryFileName);
 				copyInputStream(zipFile.getInputStream(zipEntry),
 						new BufferedOutputStream(new FileOutputStream(tunnelBinaryFileName)));
 			}
 			zipFile.close();
 		} catch (IOException ioe) {
-			System.err.println("Unhandled exception:");
-			ioe.printStackTrace();
+			logger.info("Unhandled exception:");
+			logger.info(ioe.getMessage());
 			return;
 		}
 	}
-	public static Process runCommandLine(String filePath, String tunnelLogPath, String user, String key, String tunnelName)
-			throws IOException {
-		Runtime.getRuntime().exec("chmod 777 " + filePath);
-		ProcessBuilder processBuilder = new ProcessBuilder(filePath, "-user", user, "-key", key, "-logFile",
-				tunnelLogPath,"-tunnelName",tunnelName,"-v");
-		Process tunnelProcess = processBuilder.start();
-		Thread commandLineThread = new Thread(() -> {
-			try {
-				BufferedReader reader = new BufferedReader(new InputStreamReader(tunnelProcess.getInputStream()));
-				String line = null;
-				while ((line = reader.readLine()) != null) {
-					logger.info(line);
+
+	public static Process runCommandLine(String filePath, String tunnelLogPath, String user, String key,
+			String tunnelName) throws IOException {
+		try {
+			Runtime.getRuntime().exec("chmod 777 " + filePath);
+			ProcessBuilder processBuilder = new ProcessBuilder(filePath, "-user", user, "-key", key, "-logFile",
+					tunnelLogPath, "-tunnelName", tunnelName, "-controller", "jenkins", "-v");
+			Process tunnelProcess = processBuilder.start();
+			Thread commandLineThread = new Thread(() -> {
+				try {
+					BufferedReader reader = new BufferedReader(new InputStreamReader(tunnelProcess.getInputStream()));
+					String line = null;
+					while ((line = reader.readLine()) != null) {
+						logger.info(line);
+					}
+				} catch (IOException ex) {
+					logger.info(ex.getMessage());
 				}
-			} catch (IOException ex) {
-				ex.printStackTrace();
-			}
-		});
-		commandLineThread.setDaemon(true);
-		commandLineThread.start();
-		logger.info("Tunnel Binary Executed");
-		return tunnelProcess;
+			});
+			commandLineThread.setDaemon(true);
+			commandLineThread.start();
+			logger.info("Tunnel Binary Executed");
+			return tunnelProcess;
+		} catch (Exception e) {
+			logger.info(e.getMessage());
+			return null;
+		}
+
+		// Uploading Tunnel Logs to S3
+
 
 	}
 }
