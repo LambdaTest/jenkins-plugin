@@ -29,7 +29,7 @@ plugins {
 }
 
 group = 'org.jenkins-ci.plugins'
-version = '1.14.1'
+version = '1.14.2-rc-03'
 description = 'LambdaTest Plugin is used to run automated selenium tests on LambdaTest Cloud'
 
 sourceCompatibility = 1.8
@@ -110,9 +110,9 @@ dependencies {
 	jenkinsPlugins 'org.jenkins-ci.plugins:matrix-project:1.4'
     jenkinsPlugins 'org.jenkinsci.plugins:git:1.1.25'
     jenkinsPlugins 'org.jenkins-ci.plugins:credentials:2.1.10'
-	optionalJenkinsPlugins 'org.jenkins-ci.plugins:ant:1.5'
+	optionalJenkinsPlugins 'org.jenkins-ci.plugins:ant:1.2'
 	//jenkinsTest 'org.jenkins-ci.main:maven-plugin:2.17'
-	jenkinsServer 'org.jenkins-ci.plugins:ant:1.5'
+	jenkinsServer 'org.jenkins-ci.plugins:ant:1.2'
 	compile group: 'org.jenkins-ci.plugins', name: 'structs', version:'1.7'
 	compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.7'
 	compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.7'
@@ -120,6 +120,9 @@ dependencies {
 	
 	compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.6'
 	compile group: 'org.apache.httpcomponents', name: 'httpcore', version: '4.4.10'
+	
+	compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.2'
+	compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.11.2'
 	
 	
 	// Use JUnit test framework

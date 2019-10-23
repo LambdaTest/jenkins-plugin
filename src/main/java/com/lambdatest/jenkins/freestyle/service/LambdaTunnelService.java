@@ -12,21 +12,25 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Enumeration;
-import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+
+import java.util.logging.Logger;
 
 import com.lambdatest.jenkins.freestyle.api.Constant;
 import com.lambdatest.jenkins.freestyle.api.service.CapabilityService;
 import com.lambdatest.jenkins.freestyle.exception.TunnelHashNotFoundException;
 
+import hudson.FilePath;
+
 public class LambdaTunnelService {
 	private final static Logger logger = Logger.getLogger(LambdaTunnelService.class.getName());
+//	private static final Logger logger = LogManager.getLogger(LambdaTunnelService.class);
 
 	protected static Process tunnelProcess;
 	private static String tunnelFolderName = "/";
 
-	public static Process setUp(String user, String key, String tunnelName) {
+	public static Process setUp(String user, String key, String tunnelName, FilePath workspacePath) {
 		if (OSValidator.isUnix()) {
 			logger.info("Jenkins configured on Unix/Linux, getting latest hash");
 			try {
@@ -50,7 +54,14 @@ public class LambdaTunnelService {
 							logger.info("Tunnel Binary downloaded from " + Constant.LINUX_BINARY_URL);
 						}
 						// Checking for the tunnel log file exists or not
+
 						String tunnelLogPath = "/var/lib/jenkins/tunnel.log";
+						if (workspacePath != null) {
+							FilePath tunnelPath = new FilePath(workspacePath, "tunnel.log");
+
+							logger.info("Tunnel Remote:" + tunnelPath.getRemote());
+							tunnelLogPath = tunnelPath.getRemote();
+						}
 						logger.info("Tunnel Log Path:" + tunnelLogPath);
 						File tunnelLogFile = new File(tunnelLogPath);
 						if (tunnelLogFile.exists()) {
@@ -97,6 +108,12 @@ public class LambdaTunnelService {
 						}
 						// Checking for the tunnel log file exists or not
 						String tunnelLogPath = "tunnel.log";
+						if (workspacePath != null) {
+							FilePath tunnelPath = new FilePath(workspacePath, "tunnel.log");
+
+							logger.info("Tunnel Remote:" + tunnelPath.getRemote());
+							tunnelLogPath = tunnelPath.getRemote();
+						}
 						logger.info("Tunnel Log Path:" + tunnelLogPath);
 						File tunnelLogFile = new File(tunnelLogPath);
 						if (tunnelLogFile.exists()) {
@@ -161,7 +178,7 @@ public class LambdaTunnelService {
 		String tunnelBinaryFileName = folderPath + latestHash;
 		String tunnelBinaryZipFileName = folderPath + latestHash + ".zip";
 		downloadFile(linuxBinaryUrl, tunnelBinaryZipFileName);
-		unZipIt(tunnelBinaryZipFileName,tunnelBinaryFileName,folderPath);
+		unZipIt(tunnelBinaryZipFileName, tunnelBinaryFileName, folderPath);
 	}
 
 	public static void copyInputStream(InputStream in, OutputStream out) throws IOException {
@@ -239,7 +256,6 @@ public class LambdaTunnelService {
 		}
 
 		// Uploading Tunnel Logs to S3
-
 
 	}
 }
