@@ -11,14 +11,17 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import java.util.logging.Logger;
-
 import com.lambdatest.jenkins.freestyle.api.Constant;
 import com.lambdatest.jenkins.freestyle.api.service.CapabilityService;
+import com.lambdatest.jenkins.freestyle.data.LocalTunnel;
 import com.lambdatest.jenkins.freestyle.exception.TunnelHashNotFoundException;
 
 import hudson.FilePath;
@@ -30,7 +33,8 @@ public class LambdaTunnelService {
 	protected static Process tunnelProcess;
 	private static String tunnelFolderName = "/";
 
-	public static Process setUp(String user, String key, String tunnelName, FilePath workspacePath) {
+	public static Process setUp(String user, String key, LocalTunnel localTunnel, String buildnumber, String tunnelName,
+			FilePath workspacePath) {
 		if (OSValidator.isUnix()) {
 			logger.info("Jenkins configured on Unix/Linux, getting latest hash");
 			try {
@@ -48,32 +52,15 @@ public class LambdaTunnelService {
 						if (tunnelBinary.exists()) {
 							logger.info("Tunnel Binary already exists");
 						} else {
-							logger.info("Tunnel Binary not exists, downloading...");
+							logger.info("Tunnel Binary doesn't exists, Downloading new binary ...");
 							downloadAndUnZipBinaryFile(tunnelFolderPath.getPath(), latestHash,
 									Constant.LINUX_BINARY_URL);
 							logger.info("Tunnel Binary downloaded from " + Constant.LINUX_BINARY_URL);
 						}
-						// Checking for the tunnel log file exists or not
-
-						String tunnelLogPath = "/var/lib/jenkins/tunnel.log";
-						if (workspacePath != null) {
-							FilePath tunnelPath = new FilePath(workspacePath, "tunnel.log");
-
-							logger.info("Tunnel Remote:" + tunnelPath.getRemote());
-							tunnelLogPath = tunnelPath.getRemote();
-						}
+						// Get Tunnel Log path name
+						String tunnelLogPath = getTunnelLogPath(workspacePath, buildnumber);
 						logger.info("Tunnel Log Path:" + tunnelLogPath);
-						File tunnelLogFile = new File(tunnelLogPath);
-						if (tunnelLogFile.exists()) {
-							logger.info("Tunnel log File already exists");
-						} else {
-							logger.info("Tunnel log File not exists");
-							Runtime.getRuntime().exec("chmod 777 /var/lib/jenkins/");
-							Runtime.getRuntime().exec("touch " + tunnelLogPath);
-							logger.info("Tunnel log File created");
-						}
-						Runtime.getRuntime().exec("chmod 777 " + tunnelLogPath);
-						return runCommandLine(tunnelBinaryLocation, tunnelLogPath, user, key, tunnelName);
+						return runCommandLine(tunnelBinaryLocation, tunnelLogPath, user, key, tunnelName,localTunnel);
 					} else {
 						logger.warning("tunnelFolderPath empty");
 					}
@@ -106,25 +93,10 @@ public class LambdaTunnelService {
 							downloadAndUnZipBinaryFile(tunnelFolderPath.getPath(), latestHash, Constant.MAC_BINARY_URL);
 							logger.info("Tunnel Binary downloaded from " + Constant.MAC_BINARY_URL);
 						}
-						// Checking for the tunnel log file exists or not
-						String tunnelLogPath = "tunnel.log";
-						if (workspacePath != null) {
-							FilePath tunnelPath = new FilePath(workspacePath, "tunnel.log");
-
-							logger.info("Tunnel Remote:" + tunnelPath.getRemote());
-							tunnelLogPath = tunnelPath.getRemote();
-						}
+						// Get Tunnel Log path name
+						String tunnelLogPath = getTunnelLogPath(workspacePath, buildnumber);
 						logger.info("Tunnel Log Path:" + tunnelLogPath);
-						File tunnelLogFile = new File(tunnelLogPath);
-						if (tunnelLogFile.exists()) {
-							logger.info("Tunnel log File already exists");
-						} else {
-							logger.info("Tunnel log File not exists");
-							Runtime.getRuntime().exec("touch " + tunnelLogPath);
-							logger.info("Tunnel log File created");
-						}
-						Runtime.getRuntime().exec("chmod 777 " + tunnelLogPath);
-						return runCommandLine(tunnelBinaryLocation, tunnelLogPath, user, key, tunnelName);
+						return runCommandLine(tunnelBinaryLocation, tunnelLogPath, user, key, tunnelName,localTunnel);
 					} else {
 						logger.warning("tunnelFolderPath empty");
 					}
@@ -142,6 +114,37 @@ public class LambdaTunnelService {
 			logger.info("Tunnel Option Not Available for this configuration");
 		}
 		return null;
+	}
+
+	private static String getTunnelLogPath(FilePath workspacePath, String buildnumber) {
+		String tunnelLogPath = "tunnel.log";
+		try {
+			if (workspacePath != null) {
+				// Create Tunnel Log Path
+				tunnelLogPath = new StringBuilder("tunnel").append("-").append(buildnumber).append(".log").toString();
+
+				// Create a Folder in workspace
+				FilePath tunnelFolderPath = new FilePath(workspacePath, Constant.DEFAULT_TUNNEL_FOLDER_NAME);
+				File folder = new File(tunnelFolderPath.getRemote());
+				if (!folder.exists()) {
+					if (folder.mkdir()) {
+						logger.info("Directory is created! at " + tunnelFolderPath.getRemote());
+						FilePath tunnelPath = new FilePath(tunnelFolderPath, tunnelLogPath);
+						return tunnelPath.getRemote();
+					} else {
+						logger.info("Failed to create directory! at " + tunnelFolderPath.getRemote());
+						FilePath tunnelPath = new FilePath(workspacePath, tunnelLogPath);
+						return tunnelPath.getRemote();
+					}
+				} else {
+					FilePath tunnelPath = new FilePath(tunnelFolderPath, tunnelLogPath);
+					return tunnelPath.getRemote();
+				}
+			}
+		} catch (Exception e) {
+			logger.info(e.getMessage());
+		}
+		return tunnelLogPath;
 	}
 
 	private static String getLatestHash(String url) throws TunnelHashNotFoundException {
@@ -229,11 +232,28 @@ public class LambdaTunnelService {
 	}
 
 	public static Process runCommandLine(String filePath, String tunnelLogPath, String user, String key,
-			String tunnelName) throws IOException {
+			String tunnelName, LocalTunnel localTunnel) throws IOException {
 		try {
+			//Updating permissions
 			Runtime.getRuntime().exec("chmod 777 " + filePath);
-			ProcessBuilder processBuilder = new ProcessBuilder(filePath, "-user", user, "-key", key, "-logFile",
-					tunnelLogPath, "-tunnelName", tunnelName, "-controller", "jenkins", "-v");
+			
+			// creating list of process 
+	        List<String> list = new ArrayList<String>(); 
+	        list.add(filePath);list.add("-user");list.add(user);
+	        list.add("-key");list.add(key);list.add("-logFile");list.add(tunnelLogPath);
+	        list.add("-tunnelName");list.add(tunnelName);list.add("-controller");list.add("jenkins");
+	        if(localTunnel!=null && localTunnel.isSharedTunnel()) {
+	        	list.add("-shared-tunnel");
+			}
+			if(localTunnel!=null && !localTunnel.getTunnelExtCommand().isEmpty()) {
+				String[] extCommands=localTunnel.getTunnelExtCommand().split(" ");
+				list.addAll(Arrays.asList(extCommands));
+			}
+			list.add("-v");
+	
+			// create the process
+			ProcessBuilder processBuilder = new ProcessBuilder(list);
+			logger.info("Tunnel Binary Command "+processBuilder.command());
 			Process tunnelProcess = processBuilder.start();
 			Thread commandLineThread = new Thread(() -> {
 				try {
@@ -254,8 +274,6 @@ public class LambdaTunnelService {
 			logger.info(e.getMessage());
 			return null;
 		}
-
-		// Uploading Tunnel Logs to S3
 
 	}
 }

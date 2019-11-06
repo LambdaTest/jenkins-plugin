@@ -63,6 +63,7 @@ public interface Constant {
 	String WIN_BINARY_URL = "https://downloads.lambdatest.com/tunnel/windows/64bit/ltcomponent.zip";
 
 	String DEFAULT_TUNNEL_NAME = "jenkins-tunnel";
+	String DEFAULT_TUNNEL_FOLDER_NAME= "lambda-tunnel";
 	String LT_TUNNEL_NAME = "LT_TUNNEL_NAME";
 
 	String LT_ICON_FILE_NAME = Jenkins.RESOURCE_PATH + "/plugin/lambdatest-automation/images/logo.png";

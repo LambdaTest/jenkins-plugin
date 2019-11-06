@@ -6,12 +6,11 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.apache.logging.log4j.Logger;
+import java.util.logging.Logger;
 
 import javax.annotation.CheckForNull;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.logging.log4j.LogManager;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 import org.springframework.util.CollectionUtils;
@@ -50,11 +49,13 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 	private LocalTunnel localTunnel;
 	private boolean useLocalTunnel;
 	private String tunnelName;
+	private boolean sharedTunnel;
+	private String tunnelExtCommand;
 	private Process tunnelProcess;
 	private UserAuthResponse userAuthResponse;
 
-	private static final Logger logger = LogManager.getLogger(MagicPlugBuildWrapper.class);
-
+	//private static final Logger logger = LogManager.getLogger(MagicPlugBuildWrapper.class);
+	private static final Logger logger = Logger.getLogger(MagicPlugBuildWrapper.class.getName());
 	
 	@DataBoundConstructor
 	public MagicPlugBuildWrapper(StaplerRequest req, @CheckForNull List<JSONObject> seleniumCapabilityRequest,
@@ -76,8 +77,11 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 			if (localTunnel != null) {
 				logger.info(localTunnel.toString());
 				this.localTunnel = localTunnel;
+				//To Retain this value in configure Options
 				this.useLocalTunnel = true;
 				this.tunnelName = localTunnel.getTunnelName();
+				this.sharedTunnel= localTunnel.isSharedTunnel();
+				this.tunnelExtCommand= localTunnel.getTunnelExtCommand();
 			}
 		} catch (Exception e) {
 			throw e;
@@ -90,7 +94,7 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 			this.localTunnel.setTunnelName(Constant.DEFAULT_TUNNEL_NAME);
 		}
 		String tunnelNameExt = getTunnelIdentifierExtended(localTunnel.getTunnelName(), buildname, buildnumber);
-		this.tunnelProcess = LambdaTunnelService.setUp(this.username, this.accessToken.getPlainText(), tunnelNameExt,workspacePath);
+		this.tunnelProcess = LambdaTunnelService.setUp(this.username, this.accessToken.getPlainText(),localTunnel,buildnumber, tunnelNameExt,workspacePath);
 	}
 
 	private String getTunnelIdentifierExtended(String tunnelName, String buildname, String buildnumber) {
@@ -126,12 +130,12 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 	@Override
 	public Environment setUp(AbstractBuild build, Launcher launcher, BuildListener listener)
 			throws IOException, InterruptedException {
-		logger.info(build.getWorkspace());
+		logger.info(build.getWorkspace().getName());
 		String buildname = build.getFullDisplayName().substring(0,
 				build.getFullDisplayName().length() - (String.valueOf(build.getNumber()).length() + 1));
 		String buildnumber = String.valueOf(build.getNumber());
 		// Configure Tunnel
-		if (this.localTunnel != null) {
+		if (this.localTunnel != null && this.useLocalTunnel) {
 			configureTunnel(this.localTunnel, buildname, buildnumber,build.getWorkspace());
 		}
 		for (JSONObject seleniumCapabilityRequest : seleniumCapabilityRequest) {
@@ -209,7 +213,7 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 				as.setAnalyticRequest(analyticRequest);
 				new Thread(as).start();
 			} catch (Exception e) {
-				logger.warn(e.getMessage());
+				logger.warning(e.getMessage());
 			}
 			super.buildEnvVars(env);
 		}
@@ -221,7 +225,7 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 				objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 				config = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(seleniumCapabilityRequests);
 			} catch (JsonProcessingException e) {
-				logger.warn(e.getMessage());
+				logger.warning(e.getMessage());
 			}
 			return config;
 		}
@@ -238,7 +242,7 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 					x=stopTunnel();
 				}
 			} catch (Exception e) {
-				logger.warn(e.getMessage());
+				logger.warning(e.getMessage());
 			}
 			return super.tearDown(build, listener);
 		}
@@ -357,4 +361,22 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 		this.tunnelName = tunnelName;
 	}
 
+	public boolean isSharedTunnel() {
+		return sharedTunnel;
+	}
+
+	public void setSharedTunnel(boolean sharedTunnel) {
+		this.sharedTunnel = sharedTunnel;
+	}
+
+	public String getTunnelExtCommand() {
+		return tunnelExtCommand;
+	}
+
+	public void setTunnelExtCommand(String tunnelExtCommand) {
+		this.tunnelExtCommand = tunnelExtCommand;
+	}
+
+	
+	
 }

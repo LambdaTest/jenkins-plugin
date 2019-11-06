@@ -50,9 +50,17 @@
 			</f:repeatable>	
 		</f:entry>
 		<f:optionalBlock title="Use Local Tunnel" field="localTunnel" checked="${instance.useLocalTunnel}">
-		     <f:entry title="Tunnel Name">
+		     <f:entry title="Tunnel Name" field="tunnelName">
 		       <f:textbox field="tunnelName" value="${instance.tunnelName()}"/>
 		     </f:entry>
+			 <f:nested>
+	     		<table>
+				   <f:optionalBlock title="Start Shared Tunnel" field="sharedTunnel" inline="true" checked="${instance.sharedTunnel}" />
+				</table>
+			 </f:nested> 
+			 <f:entry title="Optional Tunnel Command" field="tunnelExtCommand">
+		       <f:textbox field="tunnelExtCommand" value="${instance.tunnelExtCommand()}" />
+		     </f:entry> 	  
 		 </f:optionalBlock>
 	</f:block>
 	<f:block>
