@@ -67,5 +67,33 @@ public interface Constant {
 	String LT_TUNNEL_NAME = "LT_TUNNEL_NAME";
 
 	String LT_ICON_FILE_NAME = Jenkins.RESOURCE_PATH + "/plugin/lambdatest-automation/images/logo.png";
+	
+	
+	//New Binary Path for UnderPass Tunnel
+	String DOWNLOAD_ALPHA_TUNNEL_LINK= "https://downloads.lambdatest.com/tunnel/alpha";
+	String MAC_WS_HASH_URL = DOWNLOAD_ALPHA_TUNNEL_LINK +"/mac/64bit/latest";
+	String MAC_WS_BINARY_URL = DOWNLOAD_ALPHA_TUNNEL_LINK +"/mac/64bit/LT_Mac.zip";
 
+	String LINUX_WS_HASH_URL = DOWNLOAD_ALPHA_TUNNEL_LINK +"/linux/64bit/latest";
+	String LINUX_WS_BINARY_URL = DOWNLOAD_ALPHA_TUNNEL_LINK +"/linux/64bit/LT_Linux.zip";
+
+	String WIN_WS_HASH_URL = DOWNLOAD_ALPHA_TUNNEL_LINK +"/windows/64bit/latest";
+	String WIN_WS_BINARY_URL = DOWNLOAD_ALPHA_TUNNEL_LINK +"/windows/64bit/LT_Windows.zip";
+	
+	interface Type {
+		String HASH = "hash";
+		String BINARY = "binary";
+	}
+	
+	interface OS {
+		String UNIX = "unix";
+		String MAC = "mac";
+		String WIN = "win";
+	}
+	
+	interface Arch {
+		String x32 = "32bit";
+		String x64 = "64bit";
+	}
+	
 }

@@ -9,13 +9,15 @@ public class LocalTunnel implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private String tunnelName;
 	private boolean sharedTunnel;
+	private boolean websocketTunnel;
 	private String tunnelExtCommand;
 
 	@DataBoundConstructor
-	public LocalTunnel(boolean useLocalTunnel,String tunnelName, boolean sharedTunnel, String tunnelExtCommand) {
+	public LocalTunnel(boolean useLocalTunnel,String tunnelName, boolean sharedTunnel,boolean websocketTunnel, String tunnelExtCommand) {
 		super();
 		this.tunnelName = tunnelName;
 		this.sharedTunnel = sharedTunnel;
+		this.websocketTunnel = websocketTunnel;
 		this.tunnelExtCommand = tunnelExtCommand;
 	}
 
@@ -43,6 +45,14 @@ public class LocalTunnel implements Serializable {
 		this.tunnelExtCommand = tunnelExtCommand;
 	}
 
+	public boolean isWebsocketTunnel() {
+		return websocketTunnel;
+	}
+
+	public void setWebsocketTunnel(boolean websocketTunnel) {
+		this.websocketTunnel = websocketTunnel;
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
@@ -50,6 +60,8 @@ public class LocalTunnel implements Serializable {
 		builder.append(tunnelName);
 		builder.append(", \nsharedTunnel=");
 		builder.append(sharedTunnel);
+		builder.append(", \nwebsocketTunnel=");
+		builder.append(websocketTunnel);
 		builder.append(", \ntunnelExtCommand=");
 		builder.append(tunnelExtCommand);
 		builder.append("\n}");

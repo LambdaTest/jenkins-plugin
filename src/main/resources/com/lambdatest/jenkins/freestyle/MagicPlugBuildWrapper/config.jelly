@@ -56,6 +56,7 @@
 			 <f:nested>
 	     		<table>
 				   <f:optionalBlock title="Start Shared Tunnel" field="sharedTunnel" inline="true" checked="${instance.sharedTunnel}" />
+				   <f:optionalBlock title="Enable Websocket Mode" field="websocketTunnel" inline="true" checked="${instance.websocketTunnel}" />
 				</table>
 			 </f:nested> 
 			 <f:entry title="Optional Tunnel Command" field="tunnelExtCommand">

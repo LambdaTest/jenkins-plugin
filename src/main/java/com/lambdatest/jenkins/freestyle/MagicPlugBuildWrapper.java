@@ -27,6 +27,7 @@ import com.lambdatest.jenkins.freestyle.api.auth.UserAuthResponse;
 import com.lambdatest.jenkins.freestyle.api.service.CapabilityService;
 import com.lambdatest.jenkins.freestyle.data.LocalTunnel;
 import com.lambdatest.jenkins.freestyle.service.LambdaTunnelService;
+import com.lambdatest.jenkins.freestyle.service.LambdaWebSocketTunnelService;
 
 import hudson.FilePath;
 import hudson.Launcher;
@@ -50,6 +51,7 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 	private boolean useLocalTunnel;
 	private String tunnelName;
 	private boolean sharedTunnel;
+	private boolean websocketTunnel;
 	private String tunnelExtCommand;
 	private Process tunnelProcess;
 	private UserAuthResponse userAuthResponse;
@@ -81,6 +83,7 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 				this.useLocalTunnel = true;
 				this.tunnelName = localTunnel.getTunnelName();
 				this.sharedTunnel= localTunnel.isSharedTunnel();
+				this.websocketTunnel = localTunnel.isWebsocketTunnel();
 				this.tunnelExtCommand= localTunnel.getTunnelExtCommand();
 			}
 		} catch (Exception e) {
@@ -94,7 +97,11 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 			this.localTunnel.setTunnelName(Constant.DEFAULT_TUNNEL_NAME);
 		}
 		String tunnelNameExt = getTunnelIdentifierExtended(localTunnel.getTunnelName(), buildname, buildnumber);
-		this.tunnelProcess = LambdaTunnelService.setUp(this.username, this.accessToken.getPlainText(),localTunnel,buildnumber, tunnelNameExt,workspacePath);
+		if(localTunnel.isWebsocketTunnel()) {
+			this.tunnelProcess = LambdaWebSocketTunnelService.setUp(this.username, this.accessToken.getPlainText(),localTunnel,buildnumber, tunnelNameExt,workspacePath);
+		}else {
+			this.tunnelProcess = LambdaTunnelService.setUp(this.username, this.accessToken.getPlainText(),localTunnel,buildnumber, tunnelNameExt,workspacePath);
+		}
 	}
 
 	private String getTunnelIdentifierExtended(String tunnelName, String buildname, String buildnumber) {
@@ -375,6 +382,14 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 
 	public void setTunnelExtCommand(String tunnelExtCommand) {
 		this.tunnelExtCommand = tunnelExtCommand;
+	}
+
+	public boolean isWebsocketTunnel() {
+		return websocketTunnel;
+	}
+
+	public void setWebsocketTunnel(boolean websocketTunnel) {
+		this.websocketTunnel = websocketTunnel;
 	}
 
 	
