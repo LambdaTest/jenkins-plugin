@@ -6,14 +6,30 @@
  * user guide available at https://docs.gradle.org/4.7/userguide/java_library_plugin.html
  */
 
+buildscript {
+    repositories {
+        maven {
+            name "jenkins"
+            delegate.url("http://repo.jenkins-ci.org/releases/")
+        }
+        // The plugin is currently only available via the Jenkins
+        // Maven repository, but has dependencies in Maven Central.
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.jenkins-ci.tools:gradle-jpi-plugin:0.28.1'
+    }
+}
+
 plugins {
     // Apply the java-library plugin to add support for Java Library
     id 'java-library'
     id 'org.jenkins-ci.jpi' version '0.27.0'
+    id 'net.researchgate.release' version '2.6.0'
 }
 
 group = 'org.jenkins-ci.plugins'
-version = '1.0-SNAPSHOT'
+version = '1.16'
 description = 'LambdaTest Plugin is used to run automated selenium tests on LambdaTest Cloud'
 
 sourceCompatibility = 1.8
@@ -21,7 +37,7 @@ targetCompatibility = 1.8
 
 jenkinsPlugin {
     // version of Jenkins core this plugin depends on, must be 1.420 or later
-    coreVersion = '2.138'
+    coreVersion = '2.120'
 
     // ID of the plugin, defaults to the project name without trailing '-plugin'
     shortName = 'lambdatest-automation'
@@ -42,11 +58,13 @@ jenkinsPlugin {
     compatibleSinceVersion = '1.1.0'
     
     // set the directory from which the development server will run, defaults to 'work'
-   	//workDir = file('/tmp/jenkins')
+   	workDir = file('/tmp/jenkins')
     
     // URL used to deploy the plugin, defaults to the value shown
     // the system property 'jpi.repoUrl' can be used to override this option
     repoUrl = 'https://repo.jenkins-ci.org/releases'
+    
+    gitHubUrl = 'https://github.com/jenkinsci/lambdatest-automation-plugin'
 
     // URL used to deploy snapshots of the plugin, defaults to the value shown
     // the system property 'jpi.snapshotRepoUrl' can be used to override this option
@@ -90,11 +108,11 @@ dependencies {
     implementation 'com.google.guava:guava:23.0'
 	
 	jenkinsPlugins 'org.jenkins-ci.plugins:matrix-project:1.4'
-    //jenkinsPlugins 'org.jenkinsci.plugins:git:1.1.15'
-    jenkinsPlugins 'org.jenkins-ci.plugins:credentials:2.1.16'
-	optionalJenkinsPlugins 'org.jenkins-ci.plugins:ant:1.5'
-	jenkinsTest 'org.jenkins-ci.main:maven-plugin:2.17'
-	jenkinsServer 'org.jenkins-ci.plugins:ant:1.5'
+    jenkinsPlugins 'org.jenkinsci.plugins:git:1.1.25'
+    jenkinsPlugins 'org.jenkins-ci.plugins:credentials:2.1.10'
+	optionalJenkinsPlugins 'org.jenkins-ci.plugins:ant:1.2'
+	//jenkinsTest 'org.jenkins-ci.main:maven-plugin:2.17'
+	jenkinsServer 'org.jenkins-ci.plugins:ant:1.2'
 	compile group: 'org.jenkins-ci.plugins', name: 'structs', version:'1.7'
 	compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.7'
 	compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.7'
@@ -102,6 +120,9 @@ dependencies {
 	
 	compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.6'
 	compile group: 'org.apache.httpcomponents', name: 'httpcore', version: '4.4.10'
+	
+	compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.2'
+	compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.11.2'
 	
 	
 	// Use JUnit test framework
@@ -117,4 +138,18 @@ repositories {
      maven { url "http://repo.maven.apache.org/maven2" }
      maven { url "http://repo.spring.io/plugins-release/" }
      mavenCentral()
+}
+
+release {
+    failOnSnapshotDependencies = false
+    failOnUnversionedFiles = false
+   	buildTasks = ['build']
+    scmAdapters = [net.researchgate.release.GitAdapter]
+
+    git {
+        requireBranch = 'master'
+        pushToRemote = 'origin'
+        commitVersionFileOnly = false
+        signTag = false
+    }
 }

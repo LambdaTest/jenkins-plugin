@@ -19,13 +19,13 @@
   
 	<f:block>
 		<f:validateButton title="Ping LambdaTest" progress="${%Checking availability of API...}" method="ping" />
-		<f:entry name="choice" title="Choose Environment" field="choice">
+		<!--<f:entry name="choice" title="Choose Environment" field="choice">
     		<select name="choice">
     			<option value="beta">beta</option>
         		<option value="stage">stage</option>
-        		<option value="dev">dev</option>
+        		<option value="dev">dev</option> 
    			</select>
-		</f:entry>
+		</f:entry> -->
 		<f:entry title="Selenium Tests">
 			<f:repeatable var="seleniumCapabilityRequest" items="${instance.seleniumCapabilityRequest}"  add="Add Selenium Test Capability">
 				<table width="100%">
@@ -50,9 +50,18 @@
 			</f:repeatable>	
 		</f:entry>
 		<f:optionalBlock title="Use Local Tunnel" field="localTunnel" checked="${instance.useLocalTunnel}">
-		     <f:entry title="Tunnel Name">
+		     <f:entry title="Tunnel Name" field="tunnelName">
 		       <f:textbox field="tunnelName" value="${instance.tunnelName()}"/>
 		     </f:entry>
+			 <f:nested>
+	     		<table>
+				   <f:optionalBlock title="Start Shared Tunnel" field="sharedTunnel" inline="true" checked="${instance.sharedTunnel}" />
+				   <f:optionalBlock title="Enable Websocket Mode" field="websocketTunnel" inline="true" checked="${instance.websocketTunnel}" />
+				</table>
+			 </f:nested> 
+			 <f:entry title="Optional Tunnel Command" field="tunnelExtCommand">
+		       <f:textbox field="tunnelExtCommand" value="${instance.tunnelExtCommand()}" />
+		     </f:entry> 	  
 		 </f:optionalBlock>
 	</f:block>
 	<f:block>

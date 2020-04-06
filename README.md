@@ -24,8 +24,21 @@ https://github.com/jenkinsci/gradle-jpi-plugin
 ###### This command will run the gradle Task :server
 <pre>gradle server</pre>
 
+###### Build the Jenkins plugin file (will currently end in ".hpi".)
+```bash
+$ gradle jpi
+```
+
 ###### This command will run the gradle JVM with specified httpPort.
 <pre>gradle server -Djenkins.httpPort=8082</pre>
+
+## Release Instructions
+
+For new `releases`, bump `version` field in `build.gradle`, then execute the following command
+
+```bash
+$ gradle release -Prelease.useAutomaticVersion=true
+```
 
 ## License
 

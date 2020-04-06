@@ -26,8 +26,8 @@ import com.lambdatest.jenkins.freestyle.exception.TunnelHashNotFoundException;
 
 import hudson.FilePath;
 
-public class LambdaTunnelService {
-	private final static Logger logger = Logger.getLogger(LambdaTunnelService.class.getName());
+public class LambdaWebSocketTunnelService {
+	private final static Logger logger = Logger.getLogger(LambdaWebSocketTunnelService.class.getName());
 //	private static final Logger logger = LogManager.getLogger(LambdaTunnelService.class);
 
 	protected static Process tunnelProcess;
@@ -35,14 +35,15 @@ public class LambdaTunnelService {
 
 	public static Process setUp(String user, String key, LocalTunnel localTunnel, String buildnumber, String tunnelName,
 			FilePath workspacePath) {
+		logger.info("LambdaWebSocketTunnelService.setup process --start");
 		if (OSValidator.isUnix()) {
 			logger.info("Jenkins configured on Unix/Linux, getting latest hash");
 			try {
 				// Get Latest Hash
-				String latestHash = getLatestHash(Constant.LINUX_HASH_URL);
+				String latestHash = getLatestHash(Constant.LINUX_WS_HASH_URL);
 				logger.info(latestHash);
 				// Verify Latest binary version
-				ClassLoader loader = LambdaTunnelService.class.getClassLoader();
+				ClassLoader loader = LambdaWebSocketTunnelService.class.getClassLoader();
 				if (loader != null) {
 					URL tunnelFolderPath = loader.getResource(tunnelFolderName);
 					if (tunnelFolderPath != null) {
@@ -52,10 +53,11 @@ public class LambdaTunnelService {
 						if (tunnelBinary.exists()) {
 							logger.info("Tunnel Binary already exists");
 						} else {
-							logger.info("Tunnel Binary doesn't exists, Downloading new binary ...");
+							String binaryURL = Constant.LINUX_WS_BINARY_URL;
+							logger.info("Tunnel Binary doesn't exists, Downloading new binary from ..."+ binaryURL);
 							downloadAndUnZipBinaryFile(tunnelFolderPath.getPath(), latestHash,
-									Constant.LINUX_BINARY_URL);
-							logger.info("Tunnel Binary downloaded from " + Constant.LINUX_BINARY_URL);
+									binaryURL);
+							logger.info("Tunnel Binary downloaded from " + binaryURL);
 						}
 						// Get Tunnel Log path name
 						String tunnelLogPath = getTunnelLogPath(workspacePath, buildnumber);
@@ -74,11 +76,11 @@ public class LambdaTunnelService {
 			logger.info("Jenkins configured on Mac, getting latest hash");
 			try {
 				// Get Latest Hash
-				String latestHash = getLatestHash(Constant.MAC_HASH_URL);
+				String latestHash = getLatestHash(Constant.MAC_WS_HASH_URL);
 				logger.info(latestHash);
 				// Verify Latest binary version
 				// Checking for the tunnel log file exists or not
-				ClassLoader loader = LambdaTunnelService.class.getClassLoader();
+				ClassLoader loader = LambdaWebSocketTunnelService.class.getClassLoader();
 				if (loader != null) {
 					URL tunnelFolderPath = loader.getResource(tunnelFolderName);
 					if (tunnelFolderPath != null) {
@@ -88,10 +90,10 @@ public class LambdaTunnelService {
 						if (tunnelBinary.exists()) {
 							logger.info("Tunnel Binary already exists");
 						} else {
-							logger.info("Tunnel Binary not exists, downloading...");
-							// saveFileFromUrlWithJavaIO(tunnelBinaryLocation, Constant.MAC_BINARY_URL);
-							downloadAndUnZipBinaryFile(tunnelFolderPath.getPath(), latestHash, Constant.MAC_BINARY_URL);
-							logger.info("Tunnel Binary downloaded from " + Constant.MAC_BINARY_URL);
+							String binaryURL = Constant.MAC_WS_BINARY_URL;
+							logger.info("Tunnel Binary not exists, Downloading new binary from ..."+ binaryURL);
+							downloadAndUnZipBinaryFile(tunnelFolderPath.getPath(), latestHash, binaryURL);
+							logger.info("Tunnel Binary downloaded from " + binaryURL);
 						}
 						// Get Tunnel Log path name
 						String tunnelLogPath = getTunnelLogPath(workspacePath, buildnumber);
@@ -120,26 +122,30 @@ public class LambdaTunnelService {
 		String tunnelLogPath = "tunnel.log";
 		try {
 			if (workspacePath != null) {
+				return workspacePath.getRemote();
+				
+				
 				// Create Tunnel Log Path
-				tunnelLogPath = new StringBuilder("tunnel").append("-").append(buildnumber).append(".log").toString();
-
-				// Create a Folder in workspace
-				FilePath tunnelFolderPath = new FilePath(workspacePath, Constant.DEFAULT_TUNNEL_FOLDER_NAME);
-				File folder = new File(tunnelFolderPath.getRemote());
-				if (!folder.exists()) {
-					if (folder.mkdir()) {
-						logger.info("Directory is created! at " + tunnelFolderPath.getRemote());
-						FilePath tunnelPath = new FilePath(tunnelFolderPath, tunnelLogPath);
-						return tunnelPath.getRemote();
-					} else {
-						logger.info("Failed to create directory! at " + tunnelFolderPath.getRemote());
-						FilePath tunnelPath = new FilePath(workspacePath, tunnelLogPath);
-						return tunnelPath.getRemote();
-					}
-				} else {
-					FilePath tunnelPath = new FilePath(tunnelFolderPath, tunnelLogPath);
-					return tunnelPath.getRemote();
-				}
+//				tunnelLogPath = new StringBuilder("tunnel").append("-").append(buildnumber).append(".log").toString();
+//
+//				// Create a Folder in workspace
+//				FilePath tunnelFolderPath = new FilePath(workspacePath, Constant.DEFAULT_TUNNEL_FOLDER_NAME);
+//				File folder = new File(tunnelFolderPath.getRemote());
+//				if (!folder.exists()) {
+//					if (folder.mkdir()) {
+//						logger.info("Directory is created! at " + tunnelFolderPath.getRemote());
+//						FilePath tunnelPath = new FilePath(tunnelFolderPath, tunnelLogPath);
+//						return tunnelPath.getRemote();
+//					} else {
+//						logger.info("Failed to create directory! at " + tunnelFolderPath.getRemote());
+//						FilePath tunnelPath = new FilePath(workspacePath, tunnelLogPath);
+//						return tunnelPath.getRemote();
+//					}
+//				} else {
+//					return tunnelFolderPath.getRemote();
+////					FilePath tunnelPath = new FilePath(tunnelFolderPath, tunnelLogPath);
+////					return tunnelPath.getRemote();
+//				}
 			}
 		} catch (Exception e) {
 			logger.info(e.getMessage());
@@ -177,10 +183,10 @@ public class LambdaTunnelService {
 		}
 	}
 
-	private static void downloadAndUnZipBinaryFile(String folderPath, String latestHash, String linuxBinaryUrl) {
+	private static void downloadAndUnZipBinaryFile(String folderPath, String latestHash, String binaryUrl) {
 		String tunnelBinaryFileName = folderPath + latestHash;
 		String tunnelBinaryZipFileName = folderPath + latestHash + ".zip";
-		downloadFile(linuxBinaryUrl, tunnelBinaryZipFileName);
+		downloadFile(binaryUrl, tunnelBinaryZipFileName);
 		unZipIt(tunnelBinaryZipFileName, tunnelBinaryFileName, folderPath);
 	}
 
@@ -194,10 +200,10 @@ public class LambdaTunnelService {
 		out.close();
 	}
 
-	private static void downloadFile(String linuxBinaryUrl, String tunnelBinaryFileName) {
+	private static void downloadFile(String binaryUrl, String tunnelBinaryFileName) {
 		try {
 			logger.info(tunnelBinaryFileName);
-			BufferedInputStream in = new BufferedInputStream(new URL(linuxBinaryUrl).openStream());
+			BufferedInputStream in = new BufferedInputStream(new URL(binaryUrl).openStream());
 			FileOutputStream fileOutputStream = new FileOutputStream(tunnelBinaryFileName);
 			byte dataBuffer[] = new byte[1024];
 			int bytesRead;
@@ -239,17 +245,17 @@ public class LambdaTunnelService {
 			
 			// creating list of process 
 	        List<String> list = new ArrayList<String>(); 
-	        list.add(filePath);list.add("-user");list.add(user);
-	        list.add("-key");list.add(key);list.add("-logFile");list.add(tunnelLogPath);
-	        list.add("-tunnelName");list.add(tunnelName);list.add("-controller");list.add("jenkins");
+	        list.add(filePath);list.add("--user");list.add(user);
+	        list.add("--key");list.add(key);list.add("--logFile");list.add(tunnelLogPath);
+	        list.add("--tunnelName");list.add(tunnelName);list.add("--controller");list.add("jenkins");
 	        if(localTunnel!=null && localTunnel.isSharedTunnel()) {
-	        	list.add("-shared-tunnel");
+	        	list.add("--shared-tunnel");
 			}
 			if(localTunnel!=null && !localTunnel.getTunnelExtCommand().isEmpty()) {
 				String[] extCommands=localTunnel.getTunnelExtCommand().split(" ");
 				list.addAll(Arrays.asList(extCommands));
 			}
-			list.add("-v");
+			list.add("--verbose");
 	
 			// create the process
 			ProcessBuilder processBuilder = new ProcessBuilder(list);
