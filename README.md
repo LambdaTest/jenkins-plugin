@@ -13,7 +13,7 @@
 With TestMu AI (Formerly LambdaTest), you can run automated Selenium tests on the cloud directly from your Jenkins CI/CD pipeline using the Jenkins Automation Plugin.
 
 - [Sign up on TestMu AI](https://www.testmuai.com/register/) (Formerly LambdaTest).
-- Follow the [TestMu AI documentation](https://www.testmuai.com/support/docs/jenkins-with-testmu/) (Formerly LambdaTest) for the full setup walkthrough.
+- Follow the [Integrate Jenkins with TestMu AI](https://www.testmuai.com/support/docs/jenkins-with-testmu/) (Formerly LambdaTest) for the full setup walkthrough.
 
 ### Prerequisites
 
